@@ -51,7 +51,7 @@ stock_input <- function(stocks, from_date, to_date) {
 #graphing functions
 #############################################################################################################################
 
-
+#creates a histogram of the returns of each stock
 returns_hist <- function(stock_return) {
   ret_hist <- stock_return %>%
     ggplot(aes(x = return))+
@@ -62,7 +62,7 @@ returns_hist <- function(stock_return) {
     ylab("Count")
   return(ret_hist)
 }
-  
+#creates a plot of all correaltions of the stocks  
 correlation_plot <-function(stock_cor) {
   corrplot(stock_cor,
          order = "FPC",
@@ -77,6 +77,7 @@ correlation_plot <-function(stock_cor) {
 )
 }
 
+#plots the price development of each stock 
 stock_price_history <- function(stock_prices) {
   stock_prices %>%
     ggplot(aes(x = date, y = adjusted, color = symbol))+
@@ -88,6 +89,7 @@ stock_price_history <- function(stock_prices) {
     theme_classic()  
 }
 
+#functions to calcualte values for random drawn portfolios(can't be used in optimisation)
 neg_sharpe_ef<- function(weigths, stock_returns, stock_cov) {
     x <- (stock_returns %*% weigths)
     avg_return <- mean(x)*251
@@ -95,12 +97,12 @@ neg_sharpe_ef<- function(weigths, stock_returns, stock_cov) {
     score <- -(avg_return-0.02)/(std)
     return(score)
   } 
-
+#functions to calcualte values for random drawn portfolios(can't be used in optimisation)
 min_vol_ef <- function(weigths,stock_returns, stock_cov) {
     std <- sqrt(t(weigths)%*%(stock_cov%*%weigths))
     return(std)
   }
-  
+#drwas the effeciencyfrontier  
 efficency_frontier <- function(tickers, weigths, returns_matrix, stock_cov, n = 10000) {
   
   aplha <- rep(0.45,length(weigths))
@@ -133,7 +135,7 @@ efficency_frontier <- function(tickers, weigths, returns_matrix, stock_cov, n = 
   
   return(plot)
 }
-
+#compares a given portfolio with the S&P 500 in a line graph
 compare_SP500 <- function(weigths, returns_matrix, from_date, to_date) {
   SP500 <-  tq_get("^GSPC", from = from_date,
                    to = to_date,
@@ -164,12 +166,6 @@ compare_SP500 <- function(weigths, returns_matrix, from_date, to_date) {
   
   return(plot)
 }
-
-
-
-
-
-
 
 
 #####################################################################################################
@@ -237,7 +233,7 @@ min_vol <- function(weigths,stock_returns, stock_cov) {
   return(vol)
 }
 
-
+#finds the prtofolio with the optimal sharpe ratio
 stock_opt_sharpe <- function(tickers, weigths ,returns,cov_matrix,  upper_bounds = 1, 
                              lower_bounds = 0, port_size = 1) {
   
@@ -265,6 +261,7 @@ stock_opt_sharpe <- function(tickers, weigths ,returns,cov_matrix,  upper_bounds
   
   return(result)
 }
+#finds the prtofolio with the mimimal volatility
 stock_opt_vol <- function(tickers, weigths ,returns,cov_matrix,  upper_bounds = 1, 
                           lower_bounds = 0, port_size = 1) {
   
