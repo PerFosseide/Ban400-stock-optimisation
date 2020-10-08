@@ -6,6 +6,9 @@ library(nloptr)
 library(gtools)
 library(skimr)
 
+# Shiny implementation 
+
+# setwd(dir = "C:/Users/magnu/Documents/BAN400/Ban400-stock-optimisation")
 
 source("Ban400-Functions.R")
 
