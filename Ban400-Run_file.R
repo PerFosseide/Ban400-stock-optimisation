@@ -1,6 +1,18 @@
-setwd("C:\\Users\\Per Olav\\OneDrive\\Dokumenter\\NHH\\Master\\Ban420_Ban400\\Ban400-stock-optimisation")
-source("Ban400-Functions.R")
+library(tidyquant)
+library(tidyverse)
+library(dplyr)
+library(corrplot)
+library(nloptr)
+library(gtools)
+library(skimr)
 
+
+setwd("C:\\Users\\Per Olav\\OneDrive\\Dokumenter\\NHH\\Master\\Ban420_Ban400\\Ban400-stock-optimisation")
+
+
+
+
+source("Ban400-Functions.R")
 
 risk_free_rate <- 0.02
 
@@ -16,9 +28,10 @@ input <- stock_input(c("AAPL", "XOM", "BAC", "PFE", "NEE", "RTX"), "2015-08-01",
 
 #finds the portfolio with the higest sharpe ratio
 opt_sharpe <- stock_opt_sharpe(input[[1]],input[[7]],input[[3]],input[[6]])
+opt_sharpe[[1]]
 #finds the portfolio with the lowest yearly volatility
 opt_vol <- stock_opt_vol(input[[1]],input[[7]],input[[3]],input[[6]])
-
+opt_vol[[1]]
 #creates returns histogram
 returns_hist(input[[5]])
 #creates correlation matrix
