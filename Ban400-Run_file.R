@@ -6,12 +6,6 @@ library(nloptr)
 library(gtools)
 library(skimr)
 
-
-setwd("C:\\Users\\Per Olav\\OneDrive\\Dokumenter\\NHH\\Master\\Ban420_Ban400\\Ban400-stock-optimisation")
-
-
-
-
 source("Ban400-Functions.R")
 
 risk_free_rate <- 0.02
