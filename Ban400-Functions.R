@@ -151,14 +151,15 @@ compare_SP500 <- function(weigths, returns_matrix, from_date, to_date) {
   plot <-SP500 %>%
     ggplot(aes(x=date)) +
     geom_line(aes(y = SP500_perfomance, colour = "SP500 perfomance")) +
-    geom_line(aes(y = unlist(opt_port_performance), colour = "optimised portfolio performance")) +
+    geom_line(aes(y = unlist(opt_port_performance), colour = "Optimised portfolio performance")) +
     theme_classic()+
     scale_y_continuous(labels = scales::percent)+
     labs(x = "Date",
          y = "Cumulative return") +
     scale_colour_manual("", 
-                        breaks = c("SP500 perfomance", "optimised portfolio performance"),
-                        values = c("blue", "red"))
+                        breaks = c("SP500 perfomance", "Optimised portfolio performance"),
+                        values = c("blue", "red")) +
+    labs(title = "Optimise portfolio VS S&P500 index")
   
   
   return(plot)
@@ -247,7 +248,7 @@ stock_opt_sharpe <- function(tickers, weigths ,returns,cov_matrix,  upper_bounds
   con <- function(weigths){
     port <-weigths
     return(sum(port)-port_size) }
-  
+  nl.opts(list(xtol_rel = 0,ftol_abs = 0.0, maxeval = 10000))
   
   sharpe <- slsqp(weigths, fn = neg_sharpe(weigths,returns,cov_matrix), lower = lower_bounds,
                   upper = bounds, heq = con)
@@ -275,13 +276,14 @@ stock_opt_vol <- function(tickers, weigths ,returns,cov_matrix,  upper_bounds = 
     port <-weigths
     return(sum(port)-port_size) }
   
+  nl.opts(list(xtol_rel = 0, ftol_abs = 0.0, maxeval = 10000))
   
   min_vol <- slsqp(weigths, fn = min_vol(weigths,returns,cov_matrix), lower = lower_bounds,
                   upper = bounds, heq = con)
   
   min_vol_port <- as.data.frame(t(round(min_vol$par,4)))
   colnames(min_vol_port) <- tickers
-  Min_vol <- port_summary(sharpe$par,returns,cov_matrix)
+  Min_vol <- port_summary(min_vol$par,returns,cov_matrix)
   min_vol_port$Sharpe_ratio =   Min_vol$Sharpe_ratio
   min_vol_port$Yearly_std =   Min_vol$Yearly_std
   min_vol_port$mean_return =   Min_vol$Avg_yearly_return
