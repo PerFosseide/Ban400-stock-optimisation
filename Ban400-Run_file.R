@@ -6,11 +6,17 @@ library(nloptr)
 library(gtools)
 library(skimr)
 
+
 source("Ban400-Functions.R")
 
 risk_free_rate <- 0.02
 
-input <- stock_input(c("AAPL", "XOM", "BAC", "PFE", "NEE", "RTX"), "2015-08-01","2020-08-01")
+tickers <- c("AAPL", "XOM", "BAC", "PFE", "NEE", "RTX")
+from_date <- "2005-08-01"
+to_date <- "2010-08-01"
+
+
+input <- stock_input(tickers,from_date ,to_date)
 
 # input 1 = tickers
 # input 2 = stock_prices
@@ -38,7 +44,7 @@ stock_price_history(input[[2]])
 efficency_frontier(input[[1]],input[[7]],input[[3]],input[[6]], n = 5000)
 
 
-compare_SP500(as.matrix(opt_sharpe[[2]]),input[[3]],"2015-08-01","2020-08-01")
+compare_SP500(as.matrix(opt_vol[[2]]),input[[3]],from_date,to_date)
 
 
 
