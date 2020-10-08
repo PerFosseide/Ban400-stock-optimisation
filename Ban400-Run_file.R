@@ -5,12 +5,51 @@ library(corrplot)
 library(nloptr)
 library(gtools)
 library(skimr)
+library(shiny)
 
 # Shiny implementation 
 
 # setwd(dir = "C:/Users/magnu/Documents/BAN400/Ban400-stock-optimisation")
 
 source("Ban400-Functions.R")
+
+
+###### SHINY #########
+
+
+ui <- fluidPage(
+  
+  headerPanel('Stock-Optimisation App'),
+  sidebarPanel(
+    numericInput("rfrate", "Risk free rate: ", 
+                 min = 0, 
+                 max = NA,
+                 step = 0.001),
+    textInput("tickers", "Ticker Name: ",
+              value = "AAPL", "XOM", "BAC", "PFE",
+              placeholder = "AAPL, XOM...."),
+    dateRangeInput("tickerrange", "Ticker Range: ",
+                   start = "2005-08-01",
+                   end = "2010-08-01",
+                   min = "2005-08-01",
+                   max = "2020-10.01",
+                   format = "yyyy/mm/dd",
+                   separator = "-"),
+    
+  ),
+  mainPanel(
+    plotOutput("returns_hist"),
+    plotOutput("correlation_plot"),
+    plotOutput("stock_price_history"),
+    plotOutput("efficency_frontier"),
+    plotOutput("compare_SP500")
+  )
+)
+
+
+server <- function(input, output) {}
+
+
 
 risk_free_rate <- 0.02
 
