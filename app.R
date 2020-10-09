@@ -9,9 +9,9 @@ library(shiny)
 
 # Shiny implementation 
 
-# setwd(dir = "C:/Users/magnu/Documents/BAN400/Ban400-stock-optimisation")
+setwd(dir = "C:/Users/magnu/Documents/BAN400/Ban400-stock-optimisation")
 
-source("Ban400-Functions.R")
+
 
 
 ###### SHINY #########
@@ -20,10 +20,13 @@ source("Ban400-Functions.R")
 ui <- fluidPage(
   
   headerPanel('Stock-Optimisation App'),
+  
+  ####### = INPUT ##########
+  
   sidebarPanel(
     numericInput("rfrate", "Risk free rate: ", 
                  min = 0, 
-                 max = NA,
+                 max = 1,
                  step = 0.001),
     textInput("tickers", "Ticker Name: ",
               value = "AAPL", "XOM", "BAC", "PFE",
@@ -34,9 +37,10 @@ ui <- fluidPage(
                    min = "2005-08-01",
                    max = "2020-10.01",
                    format = "yyyy/mm/dd",
-                   separator = "-"),
-    
+                   separator = "-")
+ #################################################   
   ),
+ ######### RETURNS OUTPUT ###########
   mainPanel(
     plotOutput("returns_hist"),
     plotOutput("correlation_plot"),
@@ -47,7 +51,10 @@ ui <- fluidPage(
 )
 
 
-server <- function(input, output) {}
+server <- function(input, output) { # Assemble inputs into outputs (Backend)
+  source("Ban400-Functions.R")
+  
+} 
 
 
 

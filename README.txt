@@ -2,6 +2,8 @@
 
 ABOUT
 
+app.R is the formerly runfile in the main branch
+
 This is the readme file for our project in BAN 400
 
 The project idea is to create a shiny app where a user can determine the optimal stock portofolio from a larger set of stocks.
