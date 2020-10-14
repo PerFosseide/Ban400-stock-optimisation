@@ -1,10 +1,12 @@
 ############ README ##########
 
+Namesuggestion for the app: STOCKIFY
+
 ABOUT
 
-app.R is the formerly runfile in the main branch
+app.R is the formerly runfile in the main branch and used to create the UI, the server (the backend), and tie them together
 
-This is the readme file for our project in BAN 400
+This is the readme file for our project in BAN 400 
 
 The project idea is to create a shiny app where a user can determine the optimal stock portofolio from a larger set of stocks.
 
