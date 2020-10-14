@@ -38,29 +38,36 @@ ui <- fluidPage(
 #                 separator = "to"),
 ),
 mainPanel(
+  #verbatimTextOutput("opt_sharpe"),
+  #verbatimTextOutput("opt_volume"),
   #textOutput("rfratetext")
   #plotOutput("returns_hist"),
-  plotOutput("correlation_plot_view"),
+  #plotOutput("correlation_plot_view"),
   #plotOutput("stock_price_history"),
   #plotOutput("efficency_frontier"),
   #plotOutput("compare_SP500")
+
   )
 )
 
 server <- function(input, output) {
+  
+  data <- reactive({
+    
+    risk_free_rate <- input$rfrate
+    
+    tickers <- input$tickers
+    
+    from_date <- input$fromdate
+    to_date <- input$todate
+    
+    
+    input <- stock_input(tickers,from_date ,to_date)
+    
+  })
 
 output$correlation_plot_view <- renderPlot({
-  
-  risk_free_rate <- input$rfrate
-  
-  tickers <- input$tickers
-  
-  from_date <- input$fromdate
-  to_date <- input$todate
-  
-  
-  input <- stock_input(tickers,from_date ,to_date)
- 
+  data()
   correlation_plot(input[[4]])
 })
   
