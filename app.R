@@ -2,6 +2,13 @@
 
 library(shiny)
 source("Ban400-Functions.R")
+library(tidyquant)
+library(tidyverse)
+library(dplyr)
+library(corrplot)
+library(nloptr)
+library(gtools)
+library(skimr)
 
 ##############################
 
@@ -42,7 +49,7 @@ mainPanel(
   #verbatimTextOutput("opt_volume"),
   #textOutput("rfratetext")
   #plotOutput("returns_hist"),
-  #plotOutput("correlation_plot_view"),
+  plotOutput("correlation_plot_view"),
   #plotOutput("stock_price_history"),
   #plotOutput("efficency_frontier"),
   #plotOutput("compare_SP500")
@@ -50,9 +57,14 @@ mainPanel(
   )
 )
 
-server <- function(input, output) {
+server <- function(input, output) { # The backend
+
+  # The idea here is to input the inputs to the functions in BAN400-Functions.R
+  # and then make the plots using the functions. 
+  # However it does not work yet (får ikke til og hente ut funksjonene med subsetting 
+  # ala [[4]] som du gjorde i run-file)
   
-  data <- reactive({
+  dataInput <- reactive({
     
     risk_free_rate <- input$rfrate
     
@@ -61,14 +73,15 @@ server <- function(input, output) {
     from_date <- input$fromdate
     to_date <- input$todate
     
-    
-    input <- stock_input(tickers,from_date ,to_date)
-    
+    input <- stock_input(tickers, from_date, to_date)
+  })
+  
+  finalInput <- reactive({
+    return(dataInput())
   })
 
 output$correlation_plot_view <- renderPlot({
-  data()
-  correlation_plot(input[[4]])
+  correlation_plot(finalInput())
 })
   
 }
