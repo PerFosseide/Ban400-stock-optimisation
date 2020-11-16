@@ -16,7 +16,13 @@ stock_input <- function(stocks, from_date, to_date) {
                           get = "stock.prices")
   stock_return <- stock_prices %>%
     group_by(symbol) %>%
-    mutate(return = per_change(adjusted))
+    mutate(return = per_change(adjusted),
+           min_date = min(date)) %>% 
+    filter(min_date == from_date) %>% 
+    select(-c(min_date))
+  
+  
+    
   
   stock_cor <- stock_return %>%
     group_by(symbol) %>% #symbol = stock/ticker
@@ -37,10 +43,10 @@ stock_input <- function(stocks, from_date, to_date) {
     spread(symbol, return)%>%
     select(-(date)) %>%
     as.matrix()
+  stocks <- unique(stock_return$symbol)
   
   weigths <- rep(1/length(stocks),length(stocks))
   weigths <- as.matrix(weigths)
-  
   
   
   output <- list(stocks, stock_prices, returns_matrix, stock_cor, stock_return, stock_cov, weigths)

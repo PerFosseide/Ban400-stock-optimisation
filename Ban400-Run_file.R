@@ -5,20 +5,24 @@ library(corrplot)
 library(nloptr)
 library(gtools)
 library(skimr)
-
+library(svDialogs)
+library(TTR)
 
 source("Ban400-Functions.R")
-
 risk_free_rate <- 0.02
 
+tickersList <- stockSymbols()
+
 tickers <- c("AAPL", "XOM", "BAC", "PFE", "NEE", "RTX")
-from_date <- "2005-08-01"
-to_date <- "2010-08-01"
+from_date <- "2018-08-01"
+to_date <- "2020-08-01"
 
 
-input <- stock_input(tickers,from_date ,to_date)
+input <- stock_input(tickersList$Symbol[1:100],from_date ,to_date)
 
-# input 1 = tickers
+
+input
+ # input 1 = tickers
 # input 2 = stock_prices
 # input 3 = returns_matrix
 # input 4 = stock_correlation
@@ -45,7 +49,6 @@ efficency_frontier(input[[1]],input[[7]],input[[3]],input[[6]], n = 5000)
 
 
 compare_SP500(as.matrix(opt_vol[[2]]),input[[3]],from_date,to_date)
-
 
 
 
