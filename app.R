@@ -13,7 +13,7 @@ library(skimr)
 ##############################
 
 ui <- fluidPage(
-  headerPanel('Stockify - a stock optimizing app'),
+  headerPanel('Stockify - a stock portofolio optimizing app'),
   
   sidebarPanel(
     numericInput("rfrate", "Risk free rate: ", 0.03,
@@ -77,11 +77,11 @@ server <- function(input, output) { # The backend
   })
   
   finalInput <- reactive({
-    return(dataInput())
+    return(finalInput())
   })
 
 output$correlation_plot_view <- renderPlot({
-  correlation_plot(finalInput())
+  correlation_plot(dataInput())
 })
   
 }

@@ -58,7 +58,7 @@ server <- function(input, output) { # Assemble inputs into outputs (Backend)
         
     }
     
-} 
+ 
 
 
 
@@ -99,3 +99,4 @@ efficency_frontier(input[[1]],input[[7]],input[[3]],input[[6]], n = 5000)
 
 compare_SP500(as.matrix(opt_vol[[2]]),input[[3]],from_date,to_date)
 
+}
