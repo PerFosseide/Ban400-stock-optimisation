@@ -9,6 +9,17 @@ library(corrplot)
 library(nloptr)
 library(gtools)
 library(skimr)
+library(svDialogs)
+library(TTR)
+
+
+tickersList <- stockSymbols() 
+tickers <- c("AAPL", "XOM", "BAC", "PFE", "NEE", "RTX")
+from_date <- "2018-08-01"
+to_date <- "2020-08-01"
+functions_input <- stock_input(tickersList$Symbol[1:100], from_date, to_date)
+
+correlation_plot(functions_input[[4]])
 
 ##############################
 
@@ -20,9 +31,9 @@ ui <- fluidPage(
                  min = 0, 
                  max = 1,
                  step = 0.001),
-    textInput("tickers", "Ticker Name: ",
-              value = "AAPL",
-              placeholder = "AAPL, XOM...."),
+#    textInput("tickers", "Ticker Name: ",
+#              value = c("AAPL", "XOM", "BAC", "PFE", "NEE", "RTX"),
+#              placeholder = "AAPL, XOM...."),
     dateInput("fromdate", "Date From: ", 
               "2005-08-01",
               min = "2005-08-01",
@@ -49,10 +60,11 @@ mainPanel(
   #verbatimTextOutput("opt_volume"),
   #textOutput("rfratetext")
   #plotOutput("returns_hist"),
-  plotOutput("correlation_plot_view"),
+  plotOutput("correlation_plot_view", width = "100%", height = "400px"),
   #plotOutput("stock_price_history"),
   #plotOutput("efficency_frontier"),
   #plotOutput("compare_SP500")
+
 
   )
 )
@@ -64,24 +76,36 @@ server <- function(input, output) { # The backend
   # However it does not work yet (får ikke til og hente ut funksjonene med subsetting 
   # ala [[4]] som du gjorde i run-file)
   
+
+
+
   dataInput <- reactive({
+    
+    
+    
+    # input 1 = tickers
+    # input 2 = stock_prices
+    # input 3 = returns_matrix
+    # input 4 = stock_correlation
+    # input 5 = stock_return with date
+    # input 6 = stock_covariance
+    # input 7 = portfolio weigths
     
     risk_free_rate <- input$rfrate
     
-    tickers <- input$tickers
+#    tickers <- input$tickers
     
     from_date <- input$fromdate
     to_date <- input$todate
     
-    input <- stock_input(tickers, from_date, to_date)
   })
   
-  finalInput <- reactive({
-    return(finalInput())
-  })
+#  finalInput <- reactive({
+#    return(finalInput())
+#  })
 
 output$correlation_plot_view <- renderPlot({
-  correlation_plot(dataInput())
+  correlation_plot(functions_input[[4]])
 })
   
 }
