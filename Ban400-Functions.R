@@ -5,7 +5,9 @@ load("stock_df1.Rdata")
 load("stock_info.Rdata")
 stock_return <- stock_df %>% 
   distinct()
-
+stocks_df <- unique(stock_return$symbol)
+min_date <- min(stock_return$date)
+max_date <- max(stock_return$date)
 
 
 
@@ -19,6 +21,20 @@ per_change <- function(x) {
   x = x/lag(x)-1
   na.fill(x,0)
 }
+
+input_function <- function(stocks, from_date, to_date) {
+  output = 0
+  if(from_date < min_date) {
+    ouput <- stock_input(stocks, from_date, to_date)
+  } else if(to_date>max_date) {
+    output <- stock_input(stocks, from_date, to_date)
+  } else if (all(stocks %in% stocks_df )) {
+    output <- input_from_df(stocks, from_date, to_date)
+  } else {stock_input(stocks, from_date, to_date)}
+  
+  return(output)
+}
+
 
 
 #creates a list of inputs used in the rest of the assignment
