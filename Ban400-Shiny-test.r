@@ -76,7 +76,7 @@ server <- function(input, output) {
 
 
   
-  output$correlation_plot_view <- renderPlot({
+  output$correlation_plot <- renderPlot({
     correlation_plot(dataInput()[[4]])
   })
 }
