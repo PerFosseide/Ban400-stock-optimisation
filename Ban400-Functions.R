@@ -1,3 +1,16 @@
+##############################################################################################################
+#data
+##############################################################################################################
+load("stock_df1.Rdata")
+load("stock_info.Rdata")
+stock_return <- stock_df %>% 
+  distinct()
+
+
+
+
+
+
 
 #Input functions 
 ##############################################################################################################
@@ -11,9 +24,9 @@ per_change <- function(x) {
 #creates a list of inputs used in the rest of the assignment
 stock_input <- function(stocks, from_date, to_date) {
   
-  stock_prices <-  tq_get(stocks, from = from_date,
+  stock_prices <-  try(tq_get(stocks, from = from_date,
                           to = to_date,
-                          get = "stock.prices")
+                          get = "stock.prices"))
   stock_return <- stock_prices %>%
     group_by(symbol) %>%
     mutate(return = per_change(adjusted),
@@ -43,15 +56,89 @@ stock_input <- function(stocks, from_date, to_date) {
     spread(symbol, return)%>%
     select(-(date)) %>%
     as.matrix()
+  
+  dropped_stocks <- setdiff(unique(stocks), unique(stock_return$symbol))
+  
+  errors <- if (length(stocks)<length(unique(stock_return$symbol))) {
+    errors <- paste("dropped stocks:", dropped_stocks, collapse = " ")
+  } else {
+    errors <- "none"
+  }
   stocks <- unique(stock_return$symbol)
   
   weigths <- rep(1/length(stocks),length(stocks))
   weigths <- as.matrix(weigths)
   
+ 
   
-  output <- list(stocks, stock_prices, returns_matrix, stock_cor, stock_return, stock_cov, weigths)
+  
+  output <- list(stocks, stock_prices, returns_matrix, stock_cor, stock_return, stock_cov, weigths, errors)
   return(output)
 }
+
+
+input_from_df <- function(stocks, from_date, to_date) {
+  
+  
+  stock_prices <- stock_return %>%
+    filter(symbol %in% stocks)
+  stock_return <- stock_prices %>% 
+    group_by(symbol) %>% 
+    filter(date > from_date) %>% 
+    filter(date < to_date) %>% 
+    mutate(return = per_change(adjusted),
+           rows = n())
+  num_rows <- max(stock_return$rows)
+  stock_return <- stock_return %>% 
+    filter(rows == num_rows)
+  
+  stock_cor <- stock_return %>% 
+    group_by(symbol) %>% 
+    mutate(rn = row_number()) %>% 
+    pivot_wider(id_cols = c(symbol,return,rn),  values_from = return, names_from = symbol) %>% 
+    select(-rn) %>% 
+    cor()
+  
+  stock_cov <- stock_return %>%
+    group_by(symbol) %>% #symbol = stock/ticker
+    select(return,date) %>% # keep date to have uniqe key-value pair
+    spread(symbol,return,drop= TRUE) %>%
+    select(-(date)) %>%
+    cov()*251
+  
+  returns_matrix <- stock_return %>%
+    select(date, return) %>%
+    spread(symbol, return)%>%
+    select(-(date)) %>%
+    as.matrix()
+  dropped_stocks <- setdiff(unique(stocks), unique(stock_return$symbol))
+  
+  errors <- if (length(stocks)<length(unique(stock_return$symbol))) {
+    errors <- paste("dropped stocks:", dropped_stocks, collapse = " ")
+  } else {
+    errors <- "none"
+  }
+  stocks <- unique(stock_return$symbol)
+  
+  weigths <- rep(1/length(stocks),length(stocks))
+  weigths <- as.matrix(weigths)
+  
+  stock_prices <- stock_prices %>% 
+    group_by(symbol) %>% 
+    filter(date > from_date) %>% 
+    filter(date < to_date) %>% 
+    mutate(return = per_change(adjusted),
+           rows = n()) %>% 
+    select(-c(return, rows))
+  
+  stock_info <- stock_info %>% 
+    filter(Symbol %in% stocks)
+  
+  
+  output <- list(stocks,stock_prices, returns_matrix, stock_cor, stock_return, stock_cov, weigths, errors,stock_info)
+  return(output)
+}
+
 
 ##############################################################################################################################
 #graphing functions
@@ -89,7 +176,7 @@ stock_price_history <- function(stock_prices) {
     ggplot(aes(x = date, y = adjusted, color = symbol))+
     geom_line() +
     facet_wrap(~symbol, scales = 'free_y') +
-    labs(title = "Adjusted stock returns over time",subtitle = "01.08.2015-01.08.2020") +
+    labs(title = "Adjusted stock returns over time",subtitle = paste(from_date, " to ",to_date, sep="")) +
     xlab("Years") +
     ylab("Adjusted returns") +
     theme_classic()  
@@ -102,12 +189,14 @@ neg_sharpe_ef<- function(weigths, stock_returns, stock_cov) {
     std <- sqrt(t(weigths)%*%(stock_cov%*%weigths))
     score <- -(avg_return-0.02)/(std)
     return(score)
-  } 
+} 
+
 #functions to calcualte values for random drawn portfolios(can't be used in optimisation)
 min_vol_ef <- function(weigths,stock_returns, stock_cov) {
     std <- sqrt(t(weigths)%*%(stock_cov%*%weigths))
     return(std)
-  }
+}
+
 #drwas the effeciencyfrontier  
 efficency_frontier <- function(tickers, weigths, returns_matrix, stock_cov, n = 10000) {
   
@@ -141,6 +230,7 @@ efficency_frontier <- function(tickers, weigths, returns_matrix, stock_cov, n = 
   
   return(plot)
 }
+
 #compares a given portfolio with the S&P 500 in a line graph
 compare_SP500 <- function(weigths, returns_matrix, from_date, to_date) {
   SP500 <-  tq_get("^GSPC", from = from_date,
@@ -267,6 +357,7 @@ stock_opt_sharpe <- function(tickers, weigths ,returns,cov_matrix,  upper_bounds
   
   return(result)
 }
+
 #finds the prtofolio with the mimimal volatility
 stock_opt_vol <- function(tickers, weigths ,returns,cov_matrix,  upper_bounds = 1, 
                           lower_bounds = 0, port_size = 1) {
