@@ -47,14 +47,14 @@ ui <- fluidPage(
                  max = 1,
                  step = 0.001),
     dateInput("fromdate", "Date From: ", 
-              "2005-08-01",
-              min = "2005-08-01",
+              "2018-10-01",
+              min = "2018-08-01",
               max = "2020-10-01",
               format = "yyyy/mm/dd"
     ),
     dateInput("todate", "Date To: ",
-              "2010-08-01",
-              min = "2005-08-01",
+              "2019-08-01",
+              min = "2018-08-02",
               max = "2020-10-01",
               format = "yyyy/mm/dd"
     )),
@@ -67,21 +67,21 @@ server <- function(input, output) {
   
   
   
-# Her er tanken å oppdatere stock_input med input fra dateInput "fromdate" og "todate" (men det funker ikke)
-# reactive betyr at det oppdaterer basert på brukerinputs. 
+# Oppdaterer stock_input med input fra dateInput "fromdate" og "todate"
+# reactive betyr at det oppdateres hver gang brukerinputs endres. 
   
   dataInput <- reactive({
     stock_input(tickersList$Symbol[1:100], input$fromdate, input$todate)
   })
 
-
   
-  output$correlation_plot <- renderPlot({
+  output$vcorr_plot <- renderPlot({
     correlation_plot(dataInput()[[4]])
   })
 }
 shinyApp(ui = ui, server = server) # Combine it into the app
 
+# NB! Tar 1-2 min � laste
 
 
 
