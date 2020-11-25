@@ -23,6 +23,9 @@ to_date <- "2020-08-01"
 functions_input <- stock_input(tickersList$Symbol[1:100],from_date ,to_date)
 functions_input
 
+
+stock_input(tickersList$Symbol[1:100], from_date, to_date)
+
 # functions_input 1 = tickers
 # functions_input 2 = stock_prices
 # functions_input 3 = returns_matrix
@@ -46,7 +49,7 @@ ui <- fluidPage(
                  max = 1,
                  step = 0.001)),
   mainPanel(
-    plotOutput(inputId = "vcorr_plot"))
+    plotOutput("vcorr_plot"))
 )
 
 server <- function(input, output) {
