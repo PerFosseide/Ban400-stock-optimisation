@@ -22,7 +22,7 @@ from_date <- "2018-08-01"
 to_date <- "2020-08-01"
 
 
-functions_input <- stock_input(tickersList$Symbol[1:100],from_date ,to_date)
+functions_input <- stock_input(tickersList$Symbol[1:10],from_date ,to_date)
 functions_input
 
 # functions_input 1 = tickers
@@ -42,7 +42,19 @@ correlation_plot(functions_input[[4]])
 
 ui <- fluidPage(theme = "bootstrap.css",
   
+    tags$head(
+                  tags$style(HTML("
+      @import url('//fonts.googleapis.com/css?family=Lobster|Cabin:400,700');
+      
+      h1 {
+        font-family: 'Lobster', cursive;
+        font-weight: 500;
+        line-height: 1.1;
+        color: #1E3F66;
+      }
 
+    "))
+                ),
   
   headerPanel('Stockify - a stock portofolio optimizing app'),
   sidebarPanel(
@@ -112,7 +124,7 @@ server <- function(input, output) {
 
   
   dataInput <- eventReactive(input$update, {
-    stock_input(tickersList$Symbol[1:100], input$fromdate, input$todate)
+    stock_input(tickersList$Symbol[1:10], input$fromdate, input$todate)
   }, ignoreNULL = FALSE)
   
   ##############################################################################
