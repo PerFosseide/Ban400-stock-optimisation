@@ -9,54 +9,34 @@ library(skimr)
 library(svDialogs)
 library(TTR)
 library(markdown)
+library(shinythemes)
 #library(shinydashboard)
 
 source("Ban400-Functions.R")
 
-risk_free_rate <- 0.03
+#risk_free_rate <- 0.03
 
 tickersList <- stockSymbols()
 
-tickers <- c("AAPL", "XOM", "BAC", "PFE", "NEE", "RTX")
+#tickers <- c("AAPL", "XOM", "BAC", "PFE", "NEE", "RTX")
+
+# Setting a default date
 from_date <- "2018-08-01"
 to_date <- "2020-08-01"
 
 
-functions_input <- stock_input(tickersList$Symbol[1:10],from_date ,to_date)
-functions_input
 
-# functions_input 1 = tickers
-# functions_input 2 = stock_prices
-# functions_input 3 = returns_matrix
-# functions_input 4 = stock_correlation
-# functions_input 5 = stock_return with date
-# functions_input 6 = stock_covariance
-# functions_input 7 = portfolio weigths
-
-#finds the portfolio with the higest sharpe ratio
-opt_sharpe <- stock_opt_sharpe(functions_input[[1]],functions_input[[7]],functions_input[[3]],functions_input[[6]])
-opt_sharpe[[1]]
-
-correlation_plot(functions_input[[4]])
-
-
-ui <- fluidPage(theme = "bootstrap.css",
+ui <- fluidPage(theme = shinytheme("cosmo"),
+                
+  navbarPage("Stockify",
+             tabPanel("Home"),
+             tabPanel("Code")),
   
-    tags$head(
-                  tags$style(HTML("
-      @import url('//fonts.googleapis.com/css?family=Lobster|Cabin:400,700');
-      
-      h1 {
-        font-family: 'Lobster', cursive;
-        font-weight: 500;
-        line-height: 1.1;
-        color: #1E3F66;
-      }
-
-    "))
-                ),
+#  includeCSS("Ban400-theme.css"),
   
-  headerPanel('Stockify - a stock portofolio optimizing app'),
+
+  
+  headerPanel('Find your optimal portofolio'),
   sidebarPanel(
     numericInput("rfrate", "Risk free rate: ", 0.03,
                  min = 0, 
@@ -69,14 +49,14 @@ ui <- fluidPage(theme = "bootstrap.css",
                          list("Alcohol", "Weapons", "Defense", "Crime", "Gambling", "Marijuana", "Tobacco")
                          ),
     dateInput("fromdate", "Date From: ", 
-              "2018-10-01",
-              min = "2018-08-01",
+              from_date,
+              min = "2007-08-01",
               max = "2020-10-01",
               format = "yyyy/mm/dd"
     ),
     dateInput("todate", "Date To: ",
-              "2019-08-01",
-              min = "2018-08-02",
+              to_date,
+              min = "2007-08-02",
               max = "2020-10-01",
               format = "yyyy/mm/dd"
     ),
@@ -121,7 +101,11 @@ server <- function(input, output) {
   
   # Update stock_input with input from dateInput "fromdate" og "todate"
   # eventReactive means that it updates the function inputs every time user clicks the "update" button
-
+  
+  risk_free_rate <- eventReactive(input$update, {
+    input$rfrate
+  }, ignoreNULL = FALSE)
+  
   
   dataInput <- eventReactive(input$update, {
     stock_input(tickersList$Symbol[1:10], input$fromdate, input$todate)
@@ -145,11 +129,11 @@ server <- function(input, output) {
 #    stock_opt_vol(dataInput()[[1]], dataInput()[[7]], dataInput()[[3]], dataInput()[[6]])
 #  })
   
-  output$vopt_vol <- renderTable({
-    volatilityInput[[1]]
-  })
+#  output$vopt_vol <- renderTable({
+#    volatilityInput[[1]]
+#  })
   
-  # Generate output for the returns histogram - works
+  # Generate output for the returns histogram
   output$vreturns_hist <- renderPlot({
     returns_hist(dataInput()[[5]])
   })
@@ -163,6 +147,10 @@ server <- function(input, output) {
   output$vefficency_frontier <- renderPlot({
     efficency_frontier(dataInput()[[1]], dataInput()[[7]], dataInput()[[3]], dataInput()[[6]], n = 5000)
   })
+  
+#  output$vcompare_SP500 <- renderPlot({
+#    compare_SP500(as.matrix(vopt_vol[[2]]), dataInput()[[3]], input$fromdate, input$todate)
+#  })
   
 }
 shinyApp(ui = ui, server = server) # Combine it into the app

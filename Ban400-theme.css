@@ -1,0 +1,19 @@
+  @import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap');
+      
+      h1 {
+        font-family: 'Source Code Pro', monospace;
+        font-weight: 500;
+        line-height: 1.1;
+        color: #1E3F66;
+      }
+      
+      h4 {
+        font-family: 'Source Code Pro', monospace;
+        font-weight: 400;
+        line-height: 1.1;
+        color: #1E3F66;
+      }
+
+      body 	{
+        background-color: ##808080;
+      }
