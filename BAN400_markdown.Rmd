@@ -36,7 +36,7 @@ to_date <- "2020-05-01"
 
 
 ```{r}
-tickers <- sample(stocks_with_industry$Symbol,)
+tickers <- sample(stocks_with_industry$Symbol, 20)
 
 input <- input_function(tickers, from_date, to_date)
 

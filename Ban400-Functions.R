@@ -347,6 +347,7 @@ plot_sectors <- function(stocks) {
 
 #plot piechart of optimised industry compsisition
 portfolio_industry <- function(stocks, weigths) {
+  mycolors <- colorRampPalette(brewer.pal(8, "Set2"))(length(stocks))
   port <- as.data.frame(stocks) %>% 
     rename("Symbol" = 1) 
   
