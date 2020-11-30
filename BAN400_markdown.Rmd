@@ -23,12 +23,10 @@ source("Ban400-Functions.R")
 risk_free_rate <- 0.02
 
 
-tickers <- c("AAPL", "XOM", "BAC", "PFE", "NEE", "RTX", "GE", "TSLA")
-from_date <- "2018-08-01"
+tickers <- c("AAPL", "XOM", "BAC", "PFE", "NEE", "RTX", "GE", "REGN")
+from_date <- "2020-01-01"
 to_date <- "2020-08-01"
 
-stocks <- unique(stock_df$symbol)
-sample <- sample(stocks, size =10)
 
 ```
 
@@ -37,8 +35,13 @@ sample <- sample(stocks, size =10)
 
 
 ```{r}
+#tickers <- sample(stocks_symbols,30)
 
-input <- input_from_df(sample, from_date, to_date)
+input <- input_function(tickers, from_date, to_date)
+
+
+
+
 ```
 
 
@@ -68,6 +71,12 @@ opt_sharpe[[1]]
 #finds the portfolio with the lowest yearly volatility
 opt_vol <- stock_opt_vol(input[[1]],input[[7]],input[[3]],input[[6]])
 opt_vol[[1]]
+
+#find the portfolio with the higest sortino ratio
+opt_sortino <- stock_opt_sortino(input[[1]],input[[7]],input[[3]],input[[6]])
+opt_sortino[[1]]
+
+
 #creates returns histogram
 returns_hist(input[[5]])
 #creates correlation matrix
@@ -79,28 +88,50 @@ stock_price_history(input[[2]])
 #Creates effeciency frontier
 efficency_frontier(input[[1]],input[[7]],input[[3]],input[[6]], n = 5000)
 
+from_date <- "2020-08-01"
+to_date <-"2020-11-29"
 
-compare_SP500(as.matrix(opt_vol[[2]]),input[[3]],from_date,to_date)
 
-
-input[9]
+#tests the optimised portfolio vs the S&P500 index
+compare_SP500(as.matrix(opt_sortino[[2]]),input[[1]],from_date,to_date)
 
 ```
-
-
-
-
-
-
 
 ```{r}
+#compares a given portfolio with the S&P 500 in a line graph
+compare_SP500 <- function(weigths, stocks, from_date, to_date) {
+  SP500 <-  tq_get("^GSPC", from = from_date,
+                   to = to_date,
+                   get = "stock.prices")
+  SP500 <- SP500 %>%
+    select(date, adjusted, symbol) %>%
+    mutate(return = per_change(adjusted))
+  
+  SP500$SP500_perfomance <- cumprod(SP500$return+1)-1
+  
+  returns <- input_function(input[[1]],from_date,to_date)
+  returns_matrix <- returns[[3]]  
+  
+  SP500 <- SP500[1:nrow(returns_matrix),]
+  
 
-
+  SP500$opt_port = as.data.frame(returns_matrix %*% weigths)
+  SP500$opt_port_performance = cumprod(SP500$opt_port+1)-1
+  
+  plot <-SP500 %>%
+    ggplot(aes(x=date)) +
+    geom_line(aes(y = SP500_perfomance, colour = "SP500 perfomance")) +
+    geom_line(aes(y = unlist(opt_port_performance), colour = "Optimised portfolio performance")) +
+    theme_classic()+
+    scale_y_continuous(labels = scales::percent)+
+    labs(x = "Date",
+         y = "Cumulative return") +
+    scale_colour_manual("", 
+                        breaks = c("SP500 perfomance", "Optimised portfolio performance"),
+                        values = c("blue", "red")) +
+    labs(title = "Optimise portfolio VS S&P500 index")
+  
+  
+  return(plot)
+}
 ```
-
-
-
-
-
-
-
