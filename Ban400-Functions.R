@@ -10,6 +10,7 @@
 ##############################################################################################################
 load("df1.Rdata")
 load("stock_info.Rdata")
+load("stocks_industry.Rdata")
 
 
 
@@ -300,6 +301,78 @@ compare_SP500 <- function(weigths, stocks, from_date, to_date) {
   
   return(plot)
 }
+
+#plot portfolio industry composition
+plot_industries <- function(stocks) {
+  industries <- stocks_with_industry[stocks_with_industry$Symbol %in% stocks,]
+  mycolors <- colorRampPalette(brewer.pal(8, "Set2"))(length(stocks))
+  plot <- industries %>% 
+    group_by(Industry) %>%
+    mutate(count = n()) %>%
+    distinct(Industry, count) %>%
+    mutate(Industry = factor(x = Industry,
+                             levels = Industry)) %>% 
+    
+    ggplot(aes(x="", y = count, fill = reorder(Industry, -count))) +
+    geom_bar(stat="identity", width=1, color="white") +
+    coord_polar("y", start=0) +
+    theme_void() +  
+    scale_fill_manual(values = mycolors) +
+    
+    geom_text(aes(label = paste0(round((count/sum(count))*100), "%")), position = position_stack(vjust = 0.5))
+  
+  plot + labs(fill = "Industries")
+}
+# plot portfolio sector composition
+plot_sectors <- function(stocks) {
+  industries <- stocks_with_industry[stocks_with_industry$Symbol %in% stocks,]
+  mycolors <- colorRampPalette(brewer.pal(8, "Set2"))(length(stocks))
+  
+  plot <- industries %>% 
+    group_by(Sector) %>%
+    mutate(count = n()) %>%
+    distinct(Sector, count) %>%
+    mutate(Sector = factor(x = Sector,
+                             levels = Sector)) %>% 
+    ggplot(aes(x="", y = count, fill = reorder(Sector, -count))) +
+    geom_bar(stat="identity", width=1, color="white") +
+    coord_polar("y", start=0) +
+    theme_void() +  
+    scale_fill_manual(values = mycolors) +
+    
+    geom_text(aes(label = paste0(round((count/sum(count))*100), "%")), position = position_stack(vjust = 0.5))
+  plot + labs(fill = "Sectors")
+  
+}
+
+#plot piechart of optimised industry compsisition
+portfolio_industry <- function(stocks, weigths) {
+  port <- as.data.frame(stocks) %>% 
+    rename("Symbol" = 1) 
+  
+  port$weigths <- weigths
+  
+ plot <- port %>% 
+    left_join(stocks_with_industry, by =  c("Symbol"="Symbol")) %>% 
+    group_by(Industry) %>%
+    mutate(weigths = round(weigths,2)) %>% 
+    filter(weigths > 0.005) %>% 
+    summarise(Industry, weigths = sum(weigths)) %>% 
+    distinct(Industry, weigths) %>% 
+    mutate(Industry = factor(x = Industry,
+                             levels = Industry)) %>% 
+    ggplot(aes(x="", y = weigths, fill = reorder(Industry, -weigths))) +
+    geom_bar(stat="identity", width=1, color="white") +
+    coord_polar("y", start=0) +
+    theme_void() +  
+    scale_fill_manual(values = mycolors) +
+    
+    geom_text(aes(label = paste0((weigths*100), "%")), position = position_stack(vjust = 0.5))
+  
+  plot + labs(fill = "Industries")
+  
+}
+
 
 
 #####################################################################################################
