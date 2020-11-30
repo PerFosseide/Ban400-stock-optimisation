@@ -23,7 +23,7 @@ source("Ban400-Functions.R")
 risk_free_rate <- 0.02
 
 
-tickers <- c("AAPL", "XOM", "BAC", "PFE", "NEE", "RTX", "GE", "REGN")
+tickers <- c("AAPL", "XOM", "BAC", "PFE", "NEE", "RTX", "GE", "REGN","EQNR")
 from_date <- "2020-01-01"
 to_date <- "2020-07-01"
 
@@ -35,13 +35,13 @@ to_date <- "2020-07-01"
 
 
 ```{r}
-tickers <- sample(stocks_symbols,30)
+tickers <- sample(stocks_symbols,10)
 
 input <- input_function(tickers, from_date, to_date)
 
 length(input[[1]])
 
-
+input[[1]]
 
 ```
 
@@ -69,6 +69,7 @@ length(input[[1]])
 #finds the portfolio with the higest sharpe ratio
 opt_sharpe <- stock_opt_sharpe(input[[1]],input[[7]],input[[3]],input[[6]])
 opt_sharpe[[1]]
+
 #finds the portfolio with the lowest yearly volatility
 opt_vol <- stock_opt_vol(input[[1]],input[[7]],input[[3]],input[[6]])
 opt_vol[[1]]
@@ -89,9 +90,10 @@ stock_price_history(input[[2]])
 #Creates effeciency frontier
 efficency_frontier(input[[1]],input[[7]],input[[3]],input[[6]], n = 5000)
 
+
+
 from_date <- "2020-08-01"
 to_date <- Sys.Date()
-
 
 #tests the optimised portfolio vs the S&P500 index
 compare_SP500(as.matrix(opt_sharpe[[2]]),input[[1]],from_date,to_date)

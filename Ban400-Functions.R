@@ -186,10 +186,13 @@ returns_hist <- function(stock_return) {
 }
 #creates a plot of all correaltions of the stocks  
 correlation_plot <-function(stock_cor) {
+  col1 <- colorRampPalette(c("#7F0000", "red", "#FF7F00", "yellow",
+                             "cyan", "#007FFF", "blue", "#00007F"))
   corrplot(stock_cor,
          order = "FPC",
          method = "number",
          tl.pos = "d",
+         col = col1(100),
          tl.col = "black",
          cl.ratio = 0.2,
          cl.align = "r",
