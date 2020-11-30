@@ -32,7 +32,7 @@ to_date <- "2020-08-01"
 
 ui <- fluidPage(theme = shinytheme("cosmo"),
                 
-  navbarPage("Stockify",
+  navbarPage("Portofolio optimizer",
              tabPanel("Home"),
              tabPanel("Code"),
              windowTitle = "Stockify"),
