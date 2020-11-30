@@ -14,7 +14,8 @@ library(shinythemes)
 
 source("Ban400-Functions.R")
 
-#risk_free_rate <- 0.03
+# Setting a default risk free rate
+risk_free_rate <- 0.03
 
 tickersList <- stockSymbols()
 
@@ -30,7 +31,8 @@ ui <- fluidPage(theme = shinytheme("cosmo"),
                 
   navbarPage("Stockify",
              tabPanel("Home"),
-             tabPanel("Code")),
+             tabPanel("Code"),
+             windowTitle = "Stockify"),
   
 #  includeCSS("Ban400-theme.css"),
   
@@ -38,7 +40,7 @@ ui <- fluidPage(theme = shinytheme("cosmo"),
   
   headerPanel('Find your optimal portofolio'),
   sidebarPanel(
-    numericInput("rfrate", "Risk free rate: ", 0.03,
+    numericInput("rfrate", "Risk free rate: ", risk_free_rate,
                  min = 0, 
                  max = 1,
                  step = 0.001),
@@ -64,17 +66,13 @@ ui <- fluidPage(theme = shinytheme("cosmo"),
   mainPanel(
     # -- Showing the outputs -- #
     
+    # Optimal portofolio
+    h3("Your optimal portofolio"),
+    verbatimTextOutput("vopt_vol"),
+    
     # Stock Correlation 
     h4("Stock Correlation"),
     plotOutput("vcorr_plot"),
-    
-    # Sharpe ratio
-#    h4("Sharpe Ratio"),
-#    verbatimTextOutput("vopt_sharpe"),
-    
-    # Volatility
-#    h4("Optimal Volatility"),
-#    verbatimTextOutput("vopt_vol"),
     
     # Returns histogram
     h4("Returns Histogram"),
@@ -86,18 +84,18 @@ ui <- fluidPage(theme = shinytheme("cosmo"),
     
     # Efficiency frontier
     h4("Efficiency Frontier"),
-    plotOutput("vefficency_frontier")
+    plotOutput("vefficency_frontier"),
     
     # Comparison with S&P500
-#    h4("S&P500 Comparison"),
-#    plotOutput("vcompare_SP500")
+    h4("S&P500 Comparison"),
+    plotOutput("vcompare_SP500")
     )
 )
 
 server <- function(input, output) {
   
   
-  ##############################################################################
+  ############################### PROCESSING INPUTS ###############################################
   
   # Update stock_input with input from dateInput "fromdate" og "todate"
   # eventReactive means that it updates the function inputs every time user clicks the "update" button
@@ -106,12 +104,26 @@ server <- function(input, output) {
     input$rfrate
   }, ignoreNULL = FALSE)
   
+  # -- Making a general function for user inputs to be applied to stock_input
   
   dataInput <- eventReactive(input$update, {
-    stock_input(tickersList$Symbol[1:10], input$fromdate, input$todate)
+    stock_input(tickersList$Symbol[1:30], input$fromdate, input$todate)
   }, ignoreNULL = FALSE)
   
-  ##############################################################################
+  
+  # -- Making another input function to be able to use subsets from the stock_opt_vol and stock_opt_sharpe functions.
+  
+  vol_input <- eventReactive(input$update, {
+    stock_opt_sharpe(dataInput()[[1]], dataInput()[[7]], dataInput()[[3]], dataInput()[[6]])
+  }, ignoreNULL = FALSE)
+  
+  ############ END OF INPUT PROCESSING ##########
+  
+  ########### GENERATING OUTPUTS #############
+  
+  output$vopt_vol <- renderPrint({
+    vol_input()[[1]] # Here we output a subset of vol_input
+  })
   
   # Generate output for the correlation plot
   output$vcorr_plot <- renderPlot({
@@ -125,12 +137,12 @@ server <- function(input, output) {
 #  })
   
   # Generate output for the volatility
-#  volatilityInput <- reactive({
+# volatilityInput <- eventReactive(input$update, {
 #    stock_opt_vol(dataInput()[[1]], dataInput()[[7]], dataInput()[[3]], dataInput()[[6]])
 #  })
   
 #  output$vopt_vol <- renderTable({
-#    volatilityInput[[1]]
+#    volatilityInput()[[1]]
 #  })
   
   # Generate output for the returns histogram
@@ -148,15 +160,17 @@ server <- function(input, output) {
     efficency_frontier(dataInput()[[1]], dataInput()[[7]], dataInput()[[3]], dataInput()[[6]], n = 5000)
   })
   
-#  output$vcompare_SP500 <- renderPlot({
-#    compare_SP500(as.matrix(vopt_vol[[2]]), dataInput()[[3]], input$fromdate, input$todate)
-#  })
+  # Generate output for the S&P500 comparison
+  
+  output$vcompare_SP500 <- renderPlot({
+    compare_SP500(as.matrix(vol_input()[[2]]), dataInput()[[3]], input$fromdate, input$todate)
+  })
   
 }
+
 shinyApp(ui = ui, server = server) # Combine it into the app
 
-# NB! Tar 1-2 min å laste
-
+# Depending on the amount of stocks there can be some loading time (from 20 sec to 3 minutes)
 
 
 
