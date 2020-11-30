@@ -1,19 +1,21 @@
+#Functions for stock optimisation
+
+
+
+
+
+#import data functions
 ##############################################################################################################
 #data
 ##############################################################################################################
-load("stock_df1.Rdata")
+load("df1.Rdata")
 load("stock_info.Rdata")
-stock_return <- stock_df %>% 
-  distinct()
-stocks_df <- unique(stock_return$symbol)
-min_date <- min(stock_return$date)
-max_date <- max(stock_return$date)
 
 
 
 
 
-
+##############################################################################################################
 #Input functions 
 ##############################################################################################################
 #calcualates percentage change
@@ -22,18 +24,21 @@ per_change <- function(x) {
   na.fill(x,0)
 }
 
+# combined inputfunction
 input_function <- function(stocks, from_date, to_date) {
   output = 0
   if(from_date < min_date) {
     ouput <- stock_input(stocks, from_date, to_date)
   } else if(to_date>max_date) {
     output <- stock_input(stocks, from_date, to_date)
-  } else if (all(stocks %in% stocks_df )) {
+  } else if (all(stocks %in% stocks_symbols )) {
     output <- input_from_df(stocks, from_date, to_date)
   } else {stock_input(stocks, from_date, to_date)}
   
   return(output)
 }
+
+
 
 
 
@@ -43,21 +48,20 @@ stock_input <- function(stocks, from_date, to_date) {
   stock_prices <-  try(tq_get(stocks, from = from_date,
                           to = to_date,
                           get = "stock.prices"))
-  stock_return <- stock_prices %>%
-    group_by(symbol) %>%
+  
+  stock_return <- stock_prices %>% 
+    group_by(symbol) %>% 
     mutate(return = per_change(adjusted),
-           min_date = min(date)) %>% 
-    filter(min_date == from_date) %>% 
-    select(-c(min_date))
+           rows = n())
+  num_rows <- max(stock_return$rows)
+  stock_return <- stock_return %>% 
+    filter(rows == num_rows)
   
-  
-    
-  
-  stock_cor <- stock_return %>%
-    group_by(symbol) %>% #symbol = stock/ticker
-    select(return,date) %>% # keep date to have uniqe key-value pair
-    spread(symbol,return,drop= TRUE) %>%
-    select(-(date)) %>%
+  stock_cor <- stock_return %>% 
+    group_by(symbol) %>% 
+    mutate(rn = row_number()) %>% 
+    pivot_wider(id_cols = c(symbol,return,rn),  values_from = return, names_from = symbol) %>% 
+    select(-rn) %>% 
     cor()
   
   stock_cov <- stock_return %>%
@@ -72,7 +76,6 @@ stock_input <- function(stocks, from_date, to_date) {
     spread(symbol, return)%>%
     select(-(date)) %>%
     as.matrix()
-  
   dropped_stocks <- setdiff(unique(stocks), unique(stock_return$symbol))
   
   errors <- if (length(stocks)<length(unique(stock_return$symbol))) {
@@ -85,6 +88,16 @@ stock_input <- function(stocks, from_date, to_date) {
   weigths <- rep(1/length(stocks),length(stocks))
   weigths <- as.matrix(weigths)
   
+  stock_prices <- stock_prices %>% 
+    group_by(symbol) %>% 
+    filter(date > from_date) %>% 
+    filter(date < to_date) %>% 
+    mutate(return = per_change(adjusted),
+           rows = n()) %>% 
+    select(-c(return, rows))
+  
+  stock_info <- stock_info %>% 
+    filter(Symbol %in% stocks)
  
   
   
@@ -188,14 +201,15 @@ correlation_plot <-function(stock_cor) {
 
 #plots the price development of each stock 
 stock_price_history <- function(stock_prices) {
-  stock_prices %>%
+  plot <- stock_prices %>%
     ggplot(aes(x = date, y = adjusted, color = symbol))+
     geom_line() +
     facet_wrap(~symbol, scales = 'free_y') +
     labs(title = "Adjusted stock returns over time",subtitle = paste(from_date, " to ",to_date, sep="")) +
     xlab("Years") +
     ylab("Adjusted returns") +
-    theme_classic()  
+    theme_classic()
+  plot + theme(axis.text.x = element_blank())
 }
 
 #functions to calcualte values for random drawn portfolios(can't be used in optimisation)
@@ -248,7 +262,7 @@ efficency_frontier <- function(tickers, weigths, returns_matrix, stock_cov, n = 
 }
 
 #compares a given portfolio with the S&P 500 in a line graph
-compare_SP500 <- function(weigths, returns_matrix, from_date, to_date) {
+compare_SP500 <- function(weigths, stocks, from_date, to_date) {
   SP500 <-  tq_get("^GSPC", from = from_date,
                    to = to_date,
                    get = "stock.prices")
@@ -258,7 +272,12 @@ compare_SP500 <- function(weigths, returns_matrix, from_date, to_date) {
   
   SP500$SP500_perfomance <- cumprod(SP500$return+1)-1
   
-
+  returns <- input_function(input[[1]],from_date,to_date)
+  returns_matrix <- returns[[3]]  
+  
+  SP500 <- SP500[1:nrow(returns_matrix),]
+  
+  
   SP500$opt_port = as.data.frame(returns_matrix %*% weigths)
   SP500$opt_port_performance = cumprod(SP500$opt_port+1)-1
   
@@ -318,6 +337,8 @@ mean_return <- function(weigths,returns){
     return(x)
   }
 
+
+
 #####################################################################################################
 #optimisation functions
 ######################################################################################################
@@ -344,6 +365,9 @@ min_vol <- function(weigths,stock_returns, stock_cov) {
   
   return(vol)
 }
+
+
+
 
 #finds the prtofolio with the optimal sharpe ratio
 stock_opt_sharpe <- function(tickers, weigths ,returns,cov_matrix,  upper_bounds = 1, 
@@ -404,5 +428,59 @@ stock_opt_vol <- function(tickers, weigths ,returns,cov_matrix,  upper_bounds = 
   return(result)
 } 
 
+#function for sortino ratio
+sortino <- function(stock_return, weigths) {
+  
+  sortino_inner <- function(weigths) {
+    
+    
+    port_return <- (stock_return %*% weigths)
+    loss <- which(port_return < 0)
+    
+    downside_return <- stock_return[loss,]
+    
+    cov_mat <- cov(downside_return)*251
+    
+    mean_return <- mean(port_return)*251
+    
+    downside_std <- sqrt(t(weigths)%*%(cov_mat%*%weigths))
+    
+    sortino_ratio <- -((mean_return-risk_free_rate)/downside_std)
+    return(sortino_ratio)
+  }
+  return(sortino_inner)
+}
+
+
+
+#finds the portfolio with the optimal sharpe ratio
+stock_opt_sortino <- function(tickers, weigths,stock_return, cov_matrix,  upper_bounds = 1, 
+                              lower_bounds = 0, port_size = 1) {
+  
+  bounds <- c(rep(upper_bounds,length(weigths)))
+  lower_bounds = c(rep(lower_bounds,length(weigths)))
+  
+  con <- function(weigths){
+    port <-weigths
+    return(sum(port)-port_size) }
+  nl.opts(list(xtol_rel = 0,ftol_abs = 0.0, maxeval = 10000))
+  
+  sortino_opt <- slsqp(weigths, fn = sortino(stock_return, weigths), lower = lower_bounds,
+                       upper = bounds, heq = con)
+  
+  max_sortino_port <- as.data.frame(t(round(sortino_opt$par,4)))
+  colnames(max_sortino_port) <- tickers
+  Max_Sortino <- port_summary(sortino_opt$par,stock_return,cov_matrix)
+  max_sortino_port$Sortino_ratio = -sortino_opt$value
+  max_sortino_port$Sharpe_ratio = Max_Sortino$Sharpe_ratio
+  max_sortino_port$Yearly_std = Max_Sortino$Yearly_std
+  max_sortino_port$mean_return = Max_Sortino$Avg_yearly_return
+  max_sortino_port$Yearly_std = Max_Sortino$Yearly_std
+  
+  result <- list(max_sortino_port, sortino_opt$par)
+  
+  return(result)
+  
+}
 
 
