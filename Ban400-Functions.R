@@ -272,8 +272,8 @@ compare_SP500 <- function(weigths, stocks, from_date, to_date) {
   
   SP500$SP500_perfomance <- cumprod(SP500$return+1)-1
   
-  returns <- input_function(stocks, from_date, to_date)
-  returns_matrix <- input[[3]]  
+  returns <- input_function(input[[1]],from_date,to_date)
+  returns_matrix <- returns[[3]]  
   
   SP500 <- SP500[1:nrow(returns_matrix),]
   
