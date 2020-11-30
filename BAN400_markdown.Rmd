@@ -25,7 +25,7 @@ risk_free_rate <- 0.02
 
 tickers <- c("AAPL", "XOM", "BAC", "PFE", "NEE", "RTX", "GE", "REGN")
 from_date <- "2020-01-01"
-to_date <- "2020-08-01"
+to_date <- "2020-07-01"
 
 
 ```
@@ -35,10 +35,11 @@ to_date <- "2020-08-01"
 
 
 ```{r}
-#tickers <- sample(stocks_symbols,30)
+tickers <- sample(stocks_symbols,30)
 
 input <- input_function(tickers, from_date, to_date)
 
+length(input[[1]])
 
 
 
@@ -93,7 +94,7 @@ to_date <- Sys.Date()
 
 
 #tests the optimised portfolio vs the S&P500 index
-compare_SP500(as.matrix(opt_sortino[[2]]),input[[1]],from_date,to_date)
+compare_SP500(as.matrix(opt_sharpe[[2]]),input[[1]],from_date,to_date)
 
 ```
 
