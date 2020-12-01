@@ -12,6 +12,7 @@ library(markdown)
 library(shinythemes)
 library(shinycssloaders)
 
+
 # setting a global loading icon color
 options(spinner.color="#000000")
 
@@ -23,7 +24,7 @@ risk_free_rate <- 0.03
 #tickersList <- stockSymbols()
 
 #tickers <- c("AAPL", "XOM", "BAC", "PFE", "NEE", "RTX")
-tickers <- sample(stocks_symbols, 10) 
+tickers <- sample(stocks_with_industry$Symbol, 20)
 # Setting a default date
 from_date <- "2018-08-01"
 to_date <- "2020-08-01"
@@ -78,6 +79,10 @@ ui <- fluidPage(theme = shinytheme("cosmo"),
     
     h4("Sortino ratio"), 
     shinycssloaders::withSpinner(verbatimTextOutput("vsortino")),
+    
+    # Stock Correlation 
+    h4("Portfolio"),
+    shinycssloaders::withSpinner(plotOutput("vpiechart")),
     
     # Stock Correlation 
     h4("Stock Correlation"),
@@ -159,6 +164,12 @@ server <- function(input, output) {
   output$vsortino <- renderPrint({
     sortino_output()[[1]]
   })
+  
+  # Generate output for portfolio industry percentages
+  output$vpiechart <- renderPlot({
+    portfolio_industry(dataInput()[[1]], (sharpe_output()[[2]]))
+  })
+  
   
   # Generate output for the correlation plot
   output$vcorr_plot <- renderPlot({
