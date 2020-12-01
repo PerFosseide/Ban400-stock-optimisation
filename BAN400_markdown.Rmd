@@ -14,8 +14,12 @@ library(skimr)
 library(svDialogs)
 library(TTR)
 library(RColorBrewer)
+knitr::opts_knit$set(dev.args = list(type = "cairo"))
 
 source("Ban400-Functions.R")
+
+
+
 ```
 
 
