@@ -13,6 +13,8 @@ library(shinythemes)
 library(shinycssloaders)
 library(RColorBrewer)
 
+## Shiny ##
+
 
 # setting a global loading icon color
 options(spinner.color="#000000")
