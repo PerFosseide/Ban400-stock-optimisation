@@ -465,12 +465,23 @@ stock_opt_sharpe <- function(tickers, weigths ,returns,cov_matrix,  upper_bounds
   max_sharpe_port <- as.data.frame(t(round(sharpe$par,4)))
   colnames(max_sharpe_port) <- tickers
   Max_sharpe <- port_summary(sharpe$par,returns,cov_matrix)
+  
+  stocks <- as.data.frame(t(max_sharpe_port)) %>% 
+    arrange(desc(V1)) %>% 
+    filter(V1>0) %>% 
+    mutate(Symbol = row.names(.)) %>%  
+    left_join(stock_info, by=c("Symbol"="Symbol")) %>% 
+    rename("Percentage" = "V1") %>% 
+    select(Percentage, Name, Symbol)
+  
+  
+  
   max_sharpe_port$Sharpe_ratio = Max_sharpe$Sharpe_ratio
   max_sharpe_port$Yearly_std = Max_sharpe$Yearly_std
   max_sharpe_port$mean_return = Max_sharpe$Avg_yearly_return
   max_sharpe_port$Yearly_std = Max_sharpe$Yearly_std
   
-  result <- list(max_sharpe_port, sharpe$par)
+  result <- list(max_sharpe_port, sharpe$par, stocks)
   
   return(result)
 }
@@ -494,13 +505,21 @@ stock_opt_vol <- function(tickers, weigths ,returns,cov_matrix,  upper_bounds = 
   
   min_vol_port <- as.data.frame(t(round(min_vol$par,4)))
   colnames(min_vol_port) <- tickers
+  stocks <- as.data.frame(t(min_vol_port)) %>% 
+    arrange(desc(V1)) %>% 
+    filter(V1>0) %>% 
+    mutate(Symbol = row.names(.)) %>%  
+    left_join(stock_info, by=c("Symbol"="Symbol")) %>% 
+    rename("Percentage" = "V1") %>% 
+    select(Percentage, Name, Symbol)
+  
   Min_vol <- port_summary(min_vol$par,returns,cov_matrix)
   min_vol_port$Sharpe_ratio =   Min_vol$Sharpe_ratio
   min_vol_port$Yearly_std =   Min_vol$Yearly_std
   min_vol_port$mean_return =   Min_vol$Avg_yearly_return
   min_vol_port$Yearly_std =   Min_vol$Yearly_std
   
-  result <- list(min_vol_port, min_vol$par)
+  result <- list(min_vol_port, min_vol$par, stocks)
   
   return(result)
 } 
@@ -547,6 +566,14 @@ stock_opt_sortino <- function(tickers, weigths,stock_return, cov_matrix,  upper_
   
   max_sortino_port <- as.data.frame(t(round(sortino_opt$par,4)))
   colnames(max_sortino_port) <- tickers
+  stocks <- as.data.frame(t(max_sortino_port)) %>% 
+    arrange(desc(V1)) %>% 
+    filter(V1>0) %>% 
+    mutate(Symbol = row.names(.)) %>%  
+    left_join(stock_info, by=c("Symbol"="Symbol")) %>% 
+    rename("Percentage" = "V1") %>% 
+    select(Percentage, Name, Symbol)
+  
   Max_Sortino <- port_summary(sortino_opt$par,stock_return,cov_matrix)
   max_sortino_port$Sortino_ratio = -sortino_opt$value
   max_sortino_port$Sharpe_ratio = Max_Sortino$Sharpe_ratio
@@ -554,7 +581,7 @@ stock_opt_sortino <- function(tickers, weigths,stock_return, cov_matrix,  upper_
   max_sortino_port$mean_return = Max_Sortino$Avg_yearly_return
   max_sortino_port$Yearly_std = Max_Sortino$Yearly_std
   
-  result <- list(max_sortino_port, sortino_opt$par)
+  result <- list(max_sortino_port, sortino_opt$par, stocks)
   
   return(result)
   

@@ -72,13 +72,13 @@ ui <- fluidPage(theme = shinytheme("cosmo"),
     
     # Optimal portofolio
     h3("Your optimal portofolio"),
-    shinycssloaders::withSpinner(verbatimTextOutput("vopt_vol")),
+    shinycssloaders::withSpinner(dataTableOutput("vopt_vol")),
     
     h4("Sharpe ratio"),
-    shinycssloaders::withSpinner(verbatimTextOutput("vsharpe")),
+    shinycssloaders::withSpinner(dataTableOutput("vsharpe")),
     
     h4("Sortino ratio"), 
-    shinycssloaders::withSpinner(verbatimTextOutput("vsortino")),
+    shinycssloaders::withSpinner(dataTableOutput("vsortino")),
     
     # Stock Correlation 
     h4("Portfolio"),
@@ -151,18 +151,18 @@ server <- function(input, output) {
   ########### GENERATING OUTPUTS #############
   
   # Generate output for optimal volume
-  output$vopt_vol <- renderPrint({
-    vol_output()[[1]] # Here we output a subset of vol_input
+  output$vopt_vol <-renderDataTable({
+    vol_output()[[3]] # Here we output a subset of vol_input
   })
   
   # Generate output for sharpe ratio
-  output$vsharpe <- renderPrint({
-    sharpe_output()[[1]]
+  output$vsharpe <-  renderDataTable({
+    sharpe_output()[[3]]
   })
   
   # Generate output for sortino ratio
-  output$vsortino <- renderPrint({
-    sortino_output()[[1]]
+  output$vsortino <- renderDataTable({
+    sortino_output()[[3]]
   })
   
   # Generate output for portfolio industry percentages
