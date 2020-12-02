@@ -11,6 +11,7 @@ library(TTR)
 library(markdown)
 library(shinythemes)
 library(shinycssloaders)
+library(RColorBrewer)
 
 
 # setting a global loading icon color
@@ -24,7 +25,7 @@ risk_free_rate <- 0.03
 #tickersList <- stockSymbols()
 
 #tickers <- c("AAPL", "XOM", "BAC", "PFE", "NEE", "RTX")
-tickers <- sample(stocks_with_industry$Symbol, 20)
+tickers <- sample(stocks_with_industry$Symbol, 50)
 # Setting a default date
 from_date <- "2018-08-01"
 to_date <- "2020-08-01"
@@ -74,11 +75,26 @@ ui <- fluidPage(theme = shinytheme("cosmo"),
     h3("Your optimal portofolio"),
     shinycssloaders::withSpinner(dataTableOutput("vopt_vol")),
     
+    # portfolio stats
+    h3("Portofolio stats"),
+    shinycssloaders::withSpinner(tableOutput("vopt_stat")),
+    #sharpe
     h4("Sharpe ratio"),
     shinycssloaders::withSpinner(dataTableOutput("vsharpe")),
     
+    
+    
+    # portfolio stats
+    h3("Portofolio stats"),
+    shinycssloaders::withSpinner(tableOutput("vsharpe_stat")),
+    #sortino
     h4("Sortino ratio"), 
     shinycssloaders::withSpinner(dataTableOutput("vsortino")),
+    
+    
+    # portfolio stats
+    h3("Portofolio stats"),
+    shinycssloaders::withSpinner(tableOutput("vsortino_stat")),
     
     # Stock Correlation 
     h4("Portfolio"),
@@ -155,14 +171,29 @@ server <- function(input, output) {
     vol_output()[[3]] # Here we output a subset of vol_input
   })
   
+  # Generate output for optimal volume
+  output$vopt_stat <-renderTable({
+    vol_output()[[4]] # Here we output a subset of vol_input
+  })
+  
   # Generate output for sharpe ratio
   output$vsharpe <-  renderDataTable({
     sharpe_output()[[3]]
   })
+  # Generate output for optimal volume
+  output$vsharpe_stat <-renderTable({
+    sharpe_output()[[4]] # Here we output a subset of vol_input
+  })
+  
   
   # Generate output for sortino ratio
   output$vsortino <- renderDataTable({
     sortino_output()[[3]]
+  })
+  
+  # Generate output for sortino ratio
+  output$vsortino_stat <- renderTable({
+    sortino_output()[[4]]
   })
   
   # Generate output for portfolio industry percentages
@@ -194,7 +225,7 @@ server <- function(input, output) {
   # Generate output for the S&P500 comparison
   # -- Denne virker ikke etter oppdateringen av funksjonslisten
   output$vcompare_SP500 <- renderPlot({
-    compare_SP500(as.matrix(sharpe_output()[[2]]), dataInput()[[1]], input$fromdate, input$todate)
+    compare_SP500(as.matrix(sharpe_output()[[2]]), dataInput()[[1]],dataInput()[[3]], input$fromdate, input$todate)
   })
   
   

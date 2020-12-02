@@ -266,7 +266,7 @@ efficency_frontier <- function(tickers, weigths, returns_matrix, stock_cov, n = 
 }
 
 #compares a given portfolio with the S&P 500 in a line graph
-compare_SP500 <- function(weigths, stocks, from_date, to_date) {
+compare_SP500 <- function(weigths, stocks,returns_matrix, from_date, to_date) {
   SP500 <-  tq_get("^GSPC", from = from_date,
                    to = to_date,
                    get = "stock.prices")
@@ -481,7 +481,10 @@ stock_opt_sharpe <- function(tickers, weigths ,returns,cov_matrix,  upper_bounds
   max_sharpe_port$mean_return = Max_sharpe$Avg_yearly_return
   max_sharpe_port$Yearly_std = Max_sharpe$Yearly_std
   
-  result <- list(max_sharpe_port, sharpe$par, stocks)
+  stats <- max_sharpe_port %>% 
+    select(Sharpe_ratio, Yearly_std, mean_return)
+  
+  result <- list(max_sharpe_port, sharpe$par, stocks,stats)
   
   return(result)
 }
@@ -519,7 +522,11 @@ stock_opt_vol <- function(tickers, weigths ,returns,cov_matrix,  upper_bounds = 
   min_vol_port$mean_return =   Min_vol$Avg_yearly_return
   min_vol_port$Yearly_std =   Min_vol$Yearly_std
   
-  result <- list(min_vol_port, min_vol$par, stocks)
+  stats <- min_vol_port %>% 
+    select(Sharpe_ratio, Yearly_std, mean_return)
+  
+  
+  result <- list(min_vol_port, min_vol$par, stocks, stats)
   
   return(result)
 } 
@@ -581,7 +588,11 @@ stock_opt_sortino <- function(tickers, weigths,stock_return, cov_matrix,  upper_
   max_sortino_port$mean_return = Max_Sortino$Avg_yearly_return
   max_sortino_port$Yearly_std = Max_Sortino$Yearly_std
   
-  result <- list(max_sortino_port, sortino_opt$par, stocks)
+  stats <- max_sortino_port %>% 
+    select(Sharpe_ratio, Yearly_std, mean_return)
+  
+  
+  result <- list(max_sortino_port, sortino_opt$par, stocks, stats)
   
   return(result)
   
