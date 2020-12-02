@@ -20,6 +20,12 @@ css <- HTML(" body{
         padding-top: 65px;
   }")
 
+# Adding shadow to the navbar
+css2 <- HTML(" nav {
+  box-shadow: 0 5px 5px 0 rgba(0,0,0,.2);
+}")
+
+
 
 # setting a global loading icon color
 options(spinner.color="#000000")
@@ -41,10 +47,21 @@ to_date <- "2020-08-01"
 
 
 ui <- fluidPage(
-  tags$main(tags$style(css)), # This argument will be applied in addition to the the theme
+  tags$main(tags$style(css)),
+  tags$header(tags$style(css2)),
   theme = shinytheme("cosmo"),
+  
+  list(tags$head(HTML('<link rel="icon", href="Optimizer-logo2.png", 
+                                   type="image/png" />'))),
+  div(style="padding: 1px 0px; width: '100%'",
+      titlePanel(
+        title="", windowTitle="Portfolio Optimizer"
+      )
+      ),
+
                 
-                navbarPage("Portofolio optimizer", 
+                navbarPage(title=div(img(src="Optimizer-logo2.png"), "Portfolio Optimizer"),
+                           
                            tabPanel("Stock Selection",
                                     
                                     headerPanel('Find your optimal portofolio'),
