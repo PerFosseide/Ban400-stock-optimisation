@@ -420,6 +420,32 @@ mean_return <- function(weigths,returns){
 #optimisation functions
 ######################################################################################################
 
+optimisation_funtion <- function(Method, tickers, weigths,stock_return, cov_matrix,  upper_bounds = 1, 
+                                 lower_bounds = 0, port_size = 1) {
+  
+  input <- 0
+  if(Method == 1) {
+    input = stock_opt_sharpe(tickers, weigths,stock_return, cov_matrix, upper_bounds, lower_bounds, port_size)
+  } else if(Method == 2) {
+    input = stock_opt_sortino(tickers, weigths,stock_return, cov_matrix, upper_bounds, lower_bounds, port_size)
+  }else if(Method == 3) {
+    input = stock_opt_vol(tickers, weigths,stock_return, cov_matrix, upper_bounds, lower_bounds, port_size)
+  }
+  return(input)                            
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
 #|Function for negative Sharpe Ratio|
 neg_sharpe<- function(weigths, stock_returns, stock_cov) {
   

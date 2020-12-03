@@ -95,7 +95,7 @@ ui <- fluidPage(
                                        
                                        # Optimal portofolio
                                        h3("Your optimal portofolio"),
-                                       shinycssloaders::withSpinner(dataTableOutput("vopt_vol")))),
+                                       shinycssloaders::withSpinner(dataTableOutput("vstock_list")))),
                                        
                            tabPanel("Optimalization Method",
                                     headerPanel("Choose preffered optimalization method"),
@@ -228,6 +228,13 @@ server <- function(input, output) {
   
   
   ########### GENERATING OUTPUTS #############
+  # Generate output for optimal volume
+  output$vstock_list <-renderDataTable({
+    stocks_with_industry # Here we output a subset of vol_input
+  })
+  
+  
+  
   
   # Generate output for optimal volume
   output$vopt_vol <-renderDataTable({
