@@ -46,6 +46,7 @@ from_date <- "2018-08-01"
 to_date <- "2020-08-01"
 
 
+
 ui <- fluidPage(
   tags$main(tags$style(css)),
   tags$header(tags$style(css2)),
@@ -73,11 +74,11 @@ ui <- fluidPage(
                                                    min = 0, 
                                                    max = 1,
                                                    step = 0.001),
-                                      checkboxGroupInput("stockcategory", "Choose unfit categories:",
+                                      checkboxGroupInput("stockcategory", "Choose desired stock-types to choose from:",
                                                          choiceNames = 
-                                                           list("Alcohol", "Weapons", "Defense", "Crime", "Gambling", "Marijuana", "Tobacco"),
+                                                           list("Regular Stocks", "Sin-Stocks", "Green-Stocks", "Renewable-Stocks"),
                                                          choiceValues = 
-                                                           list("1", "2", "3", "4", "5", "6", "7")
+                                                           list("1", "2", "3", "4")
                                       ),
                                       dateInput("fromdate", "Date From: ", 
                                                 from_date,
@@ -106,9 +107,10 @@ ui <- fluidPage(
                                       selectInput("method", "Optimalization method:",
                                                   c("Sharpe Ratio Maximizing", 
                                                     "Volatility Minimizing", 
-                                                    "Sortino Ratio Maximizing")), 
+                                                    "Sortino Ratio Maximizing"),
+                                                  selected = "Sharpe Ratio Maximizing"), 
                                       
-                                      
+                                    
                                       
                                       mainPanel(
                                         h3("About the methods:"),
@@ -126,20 +128,27 @@ ui <- fluidPage(
                                         tabPanel("Portofolio stats",
                                                  
                                                  # Portfolio stats
-                                                 h3("Volatility min stats"),
-                                                 shinycssloaders::withSpinner(tableOutput("vopt_stat")), # This needs to be dynamic and show the stats from the chosen method
+                                                 h3("General Stats"),
+                                                 shinycssloaders::withSpinner(tableOutput("stats")), # This needs to be dynamic and show the stats from the chosen method
+                                                 
+                                                 h3("Optimal Volume"),
+                                                 shinycssloaders::withSpinner(dataTableOutput("volstats")),
+                                                 
+                                                 # port stats
+                                                # h3("Vol min stats"),
+                                                # shinycssloaders::withSpinner(tableOutput("vopt_stat")),
                                                  
                                                  # Portfolio stats
-                                                 h3("Sharpe max stats"),
-                                                 shinycssloaders::withSpinner(tableOutput("vsharpe_stat")),
+                                                # h3("Sharpe max stats"),
+                                                # shinycssloaders::withSpinner(tableOutput("vsharpe_stat")),
                                                  
                                                  # portfolio stats
-                                                 h3("Stortino max stats"),
-                                                 shinycssloaders::withSpinner(tableOutput("vsortino_stat")),
+                                                # h3("Stortino max stats"),
+                                                # shinycssloaders::withSpinner(tableOutput("vsortino_stat")),
                                                  
                                                  #sortino
-                                                 h4("Sortino ratio"), 
-                                                 shinycssloaders::withSpinner(dataTableOutput("vsortino")),
+                                                # h4("Sortino ratio"), 
+                                                # shinycssloaders::withSpinner(dataTableOutput("vsortino")),
                                                  
                                                  
                                                   ),
@@ -168,7 +177,10 @@ ui <- fluidPage(
                                                  # Comparison with S&P500
                                                  h4("S&P500 Comparison"),
                                                  shinycssloaders::withSpinner(plotOutput("vcompare_SP500"))
-                                                 ))
+                                                 ),
+                                      tabPanel("Extras", 
+                                              
+                                              h4("Soon to be added")))
                                       
                                       
                                     # portfolio stats
@@ -252,35 +264,37 @@ server <- function(input, output, session) {
   
   
   
-  # Generate output for optimal volume
-  output$vopt_vol <-renderDataTable({
-    vol_output()[[3]] # Here we output a subset of vol_input
+  # Generate output for stats based upon chosen method
+  
+  output$stats <- renderTable({
+    x <- input$method
+    if (x == "Sharpe Ratio Maximizing"){
+      sharpe_output()[[4]]
+    }
+    else if (x == "Sortino Ratio Maximizing"){
+      sortino_output()[[4]]
+    }
+    else{
+      vol_output()[[4]]
+    }
   })
   
-  # Generate output for optimal volume
-  output$vopt_stat <-renderTable({
-    vol_output()[[4]] # Here we output a subset of vol_input
+  # Generate output for optimal volume based upon chosen method
+  
+  output$volstats <- renderDataTable({
+    x <- input$method
+    if (x == "Sharpe Ratio Maximizing"){
+      sharpe_output()[[3]]
+    }
+    else if (x == "Sortino Ratio Maximizing"){
+      sortino_output()[[3]]
+    }
+    else{
+      vol_output()[[3]]
+    }
   })
   
-  # Generate output for sharpe ratio
-  output$vsharpe <-  renderDataTable({
-    sharpe_output()[[3]]
-  })
-  # Generate output for optimal volume
-  output$vsharpe_stat <-renderTable({
-    sharpe_output()[[4]] # Here we output a subset of vol_input
-  })
-  
-  
-  # Generate output for sortino ratio
-  output$vsortino <- renderDataTable({
-    sortino_output()[[3]]
-  })
-  
-  # Generate output for sortino ratio
-  output$vsortino_stat <- renderTable({
-    sortino_output()[[4]]
-  })
+
   
   # Generate output for portfolio industry percentages
   output$vpiechart <- renderPlot({
