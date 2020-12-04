@@ -97,7 +97,7 @@ ui <- fluidPage(
                                        # -- Showing the outputs -- #
                                        
                                        # Optimal portofolio
-                                       h3("Your optimal portofolio"),
+                                       h3("Available Stocks"),
                                        shinycssloaders::withSpinner(dataTableOutput("vstock_list")))),
                                        
                            tabPanel("Optimalization Method",
