@@ -40,7 +40,7 @@ risk_free_rate <- 0.03
 #tickersList <- stockSymbols()
 
 #tickers <- c("AAPL", "XOM", "BAC", "PFE", "NEE", "RTX")
-tickers <- sample(stocks_with_industry$Symbol, 50)
+tickers <- sample_function(10)
 # Setting a default date
 from_date <- "2018-08-01"
 to_date <- "2020-08-01"
@@ -293,12 +293,13 @@ server <- function(input, output) {
   })
   
   # Generate output for the S&P500 comparison
-  # -- Denne virker ikke etter oppdateringen av funksjonslisten
-  output$vcompare_SP500 <- renderPlot({
-    compare_SP500(as.matrix(sharpe_output()[[2]]), dataInput()[[1]],dataInput()[[3]], input$fromdate, input$todate)
+   #-- Denne virker ikke etter oppdateringen av funksjonslisten
+  
+   output$vcompare_SP500 <- renderPlot({
+    compare_SP500(as.matrix(sharpe_output()[[2]]), dataInput()[[1]], input$fromdate, Sys.Date())
   })
   
-  
+ 
 }
 
 shinyApp(ui = ui, server = server) # Combine it into the app

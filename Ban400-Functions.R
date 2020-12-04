@@ -19,11 +19,6 @@ load("stocks_industry.Rdata")
 ##############################################################################################################
 #Input functions 
 ##############################################################################################################
-#calcualates percentage change
-per_change <- function(x) {
-  x = x/lag(x)-1
-  na.fill(x,0)
-}
 
 # combined inputfunction
 input_function <- function(stocks, from_date, to_date) {
@@ -37,6 +32,24 @@ input_function <- function(stocks, from_date, to_date) {
   } else {stock_input(stocks, from_date, to_date)}
   
   return(output)
+}
+
+
+# sample filtred stocks
+
+sample_function <- function(number_of_stocks, selected_industries = c("ALL"), filtered_industries = c("None")) {
+  return_stocks <- ""
+  if(selected_industries[1] == "ALL" & filtered_industries[1] == "None") {
+    return_stocks <- sample(stocks_with_industry$Symbol, number_of_stocks)
+  } else if(selected_industries[1] != "ALL") {
+    x <- stocks_with_industry %>% 
+      filter(Industry %in% selected_industries) %>% 
+      filter(!Industry %in% filtered_industries)
+    
+    return_stocks <- sample(x$Symbol,number_of_stocks)
+  }
+  return(return_stocks)
+  
 }
 
 
@@ -266,7 +279,7 @@ efficency_frontier <- function(tickers, weigths, returns_matrix, stock_cov, n = 
 }
 
 #compares a given portfolio with the S&P 500 in a line graph
-compare_SP500 <- function(weigths, stocks,returns_matrix, from_date, to_date) {
+compare_SP500 <- function(weigths, stocks, from_date, to_date) {
   SP500 <-  tq_get("^GSPC", from = from_date,
                    to = to_date,
                    get = "stock.prices")
@@ -276,7 +289,7 @@ compare_SP500 <- function(weigths, stocks,returns_matrix, from_date, to_date) {
   
   SP500$SP500_perfomance <- cumprod(SP500$return+1)-1
   
-  returns <- input_function(input[[1]],from_date,to_date)
+  returns <- input_function(stocks,from_date,to_date)
   returns_matrix <- returns[[3]]  
   
   SP500 <- SP500[1:nrow(returns_matrix),]
@@ -415,6 +428,14 @@ mean_return <- function(weigths,returns){
   }
 
 
+#calcualates percentage change
+per_change <- function(x) {
+  x = x/lag(x)-1
+  na.fill(x,0)
+}
+
+
+
 
 #####################################################################################################
 #optimisation functions
@@ -438,18 +459,10 @@ optimisation_funtion <- function(Method, tickers, weigths,stock_return, cov_matr
 
 
 
-
-
-
-
-
-
-
-
 #|Function for negative Sharpe Ratio|
 neg_sharpe<- function(weigths, stock_returns, stock_cov) {
   
-  sharpe <- function(weigths) {
+   sharpe <- function(weigths) {
     x <- (stock_returns %*% weigths)
     avg_return <- mean(x)*251
     std <- sqrt(t(weigths)%*%(stock_cov%*%weigths))
