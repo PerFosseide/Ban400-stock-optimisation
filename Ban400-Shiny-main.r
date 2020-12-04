@@ -40,7 +40,7 @@ risk_free_rate <- 0.03
 #tickersList <- stockSymbols()
 
 #tickers <- c("AAPL", "XOM", "BAC", "PFE", "NEE", "RTX")
-tickers <- sample_function(10)
+#tickers <- sample_function(10)
 # Setting a default date
 from_date <- "2018-08-01"
 to_date <- "2020-08-01"
@@ -66,6 +66,9 @@ ui <- fluidPage(
                                     
                                     headerPanel('Find your optimal portofolio'),
                                     sidebarPanel(
+                                      
+                                      selectInput("manual", "Manually select stocks", stocks_with_industry$Symbol, multiple = TRUE, selectize = TRUE),
+                                      
                                       numericInput("rfrate", "Risk free rate: ", risk_free_rate,
                                                    min = 0, 
                                                    max = 1,
@@ -74,7 +77,7 @@ ui <- fluidPage(
                                                          choiceNames = 
                                                            list("Alcohol", "Weapons", "Defense", "Crime", "Gambling", "Marijuana", "Tobacco"),
                                                          choiceValues = 
-                                                           list("Alcohol", "Weapons", "Defense", "Crime", "Gambling", "Marijuana", "Tobacco")
+                                                           list("1", "2", "3", "4", "5", "6", "7")
                                       ),
                                       dateInput("fromdate", "Date From: ", 
                                                 from_date,
@@ -104,6 +107,9 @@ ui <- fluidPage(
                                                   c("Sharpe Ratio Maximizing", 
                                                     "Volatility Minimizing", 
                                                     "Sortino Ratio Maximizing")), 
+                                      
+                                      
+                                      
                                       mainPanel(
                                         h3("About the methods:"),
                                         h4("Sharpe ratio: "),
@@ -185,7 +191,7 @@ ui <- fluidPage(
                 
   
                 
-server <- function(input, output) {
+server <- function(input, output, session) {
   
   
   
@@ -193,6 +199,16 @@ server <- function(input, output) {
   
   # Update stock_input with input from dateInput "fromdate" og "todate"
   # eventReactive means that it updates the function inputs every time user clicks the "update" button
+  
+  
+  updateSelectInput(session, "manual", 
+                    choices = stocks_with_industry$Symbol, # choices
+                    selected = sample(stocks_with_industry$Symbol, 10)) # sample 10 random stocks as default value
+  
+  tickers1 <- eventReactive(input$update, {
+    input$manual
+  }, ignoreNULL = FALSE)
+  
   
   risk_free_rate <- eventReactive(input$update, {
     input$rfrate
@@ -203,7 +219,7 @@ server <- function(input, output) {
   # -- Making a general function for user inputs to be applied to stock_input
   
   dataInput <- eventReactive(input$update, {
-    input_function(tickers, input$fromdate, input$todate)
+    input_function(tickers1(), input$fromdate, input$todate)
   }, ignoreNULL = FALSE)
   
   
