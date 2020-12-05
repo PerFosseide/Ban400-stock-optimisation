@@ -326,7 +326,7 @@ server <- function(input, output, session) {
    #-- Denne virker ikke etter oppdateringen av funksjonslisten
   
    output$vcompare_SP500 <- renderPlot({
-    compare_SP500(as.matrix(sharpe_output()[[2]]), dataInput()[[1]], input$fromdate, Sys.Date())
+    compare_SP500(as.matrix(sharpe_output()[[2]]), dataInput()[[1]], input$fromdate, input$todate)
   })
   
  

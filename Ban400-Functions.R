@@ -280,8 +280,9 @@ efficency_frontier <- function(tickers, weigths, returns_matrix, stock_cov, n = 
 
 #compares a given portfolio with the S&P 500 in a line graph
 compare_SP500 <- function(weigths, stocks, from_date, to_date) {
+  
   SP500 <-  tq_get("^GSPC", from = from_date,
-                   to = to_date,
+                   to = Sys.Date(),
                    get = "stock.prices")
   SP500 <- SP500 %>%
     select(date, adjusted, symbol) %>%
@@ -289,7 +290,7 @@ compare_SP500 <- function(weigths, stocks, from_date, to_date) {
   
   SP500$SP500_perfomance <- cumprod(SP500$return+1)-1
   
-  returns <- input_function(stocks,from_date,to_date)
+  returns <- input_function(stocks,from_date,Sys.Date())
   returns_matrix <- returns[[3]]  
   
   SP500 <- SP500[1:nrow(returns_matrix),]
@@ -303,6 +304,7 @@ compare_SP500 <- function(weigths, stocks, from_date, to_date) {
     geom_line(aes(y = SP500_perfomance, colour = "SP500 perfomance")) +
     geom_line(aes(y = unlist(opt_port_performance), colour = "Optimised portfolio performance")) +
     theme_classic()+
+    geom_vline(xintercept = as.numeric(as.Date(to_date)), color = "black", linetype=2, size=1) +
     scale_y_continuous(labels = scales::percent)+
     labs(x = "Date",
          y = "Cumulative return") +
