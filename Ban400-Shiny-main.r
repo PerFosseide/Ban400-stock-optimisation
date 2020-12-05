@@ -58,151 +58,169 @@ ui <- fluidPage(
       titlePanel(
         title="", windowTitle="Portfolio Optimizer"
       )
-      ),
-
-                
-                navbarPage(title=div(img(src="Optimizer-logo2.png"), "Portfolio Optimizer"),
-                           
-                           tabPanel("Stock Selection",
-                                    
-                                    headerPanel('Find your optimal portofolio'),
-                                    sidebarPanel(
-                                      
-                                      selectInput("manual", "Manually select stocks", stocks_with_industry$Symbol, multiple = TRUE, selectize = TRUE),
-                                      
-                                      numericInput("rfrate", "Risk free rate: ", risk_free_rate,
-                                                   min = 0, 
-                                                   max = 1,
-                                                   step = 0.001),
-                                      checkboxGroupInput("stockcategory", "Choose desired stock-types to choose from:",
-                                                         choiceNames = 
-                                                           list("Regular Stocks", "Sin-Stocks", "Green-Stocks", "Renewable-Stocks"),
-                                                         choiceValues = 
-                                                           list("1", "2", "3", "4")
-                                      ),
-                                      dateInput("fromdate", "Date From: ", 
-                                                from_date,
-                                                min = "2007-08-01",
-                                                max = "2020-10-01",
-                                                format = "yyyy/mm/dd"
-                                      ),
-                                      dateInput("todate", "Date To: ",
-                                                to_date,
-                                                min = "2007-08-02",
-                                                max = "2020-10-01",
-                                                format = "yyyy/mm/dd"
-                                      ),
-                                      actionButton("update", "Update")),
-                           
-                                     mainPanel(
-                                       # -- Showing the outputs -- #
-                                       
-                                       # Optimal portofolio
-                                       h3("Available Stocks"),
-                                       shinycssloaders::withSpinner(dataTableOutput("vstock_list")))),
-                                       
-                           tabPanel("Optimalization Method",
-                                    headerPanel("Choose preffered optimalization method"),
-                                    sidebarPanel(
-                                      selectInput("method", "Optimalization method:",
-                                                  c("Sharpe Ratio Maximizing", 
-                                                    "Volatility Minimizing", 
-                                                    "Sortino Ratio Maximizing"),
-                                                  selected = "Sharpe Ratio Maximizing"), 
-                                      
-                                    
-                                      
-                                      mainPanel(
-                                        h3("About the methods:"),
-                                        h4("Sharpe ratio: "),
-                                        h4("Volatility: "),
-                                        h4("Sortino: "))
-                                      )
-                                  ),
-                           
-                           
-                           tabPanel("Results",
-                                    headerPanel("Your optimal portofolio"),
-                                    mainPanel(
-                                      tabsetPanel(
-                                        tabPanel("Portofolio stats",
-                                                 
-                                                 # Portfolio stats
-                                                 h3("General Stats"),
-                                                 shinycssloaders::withSpinner(tableOutput("stats")), # This needs to be dynamic and show the stats from the chosen method
-                                                 
-                                                 h3("Optimal Volume"),
-                                                 shinycssloaders::withSpinner(dataTableOutput("volstats")),
-                                                 
-                                                 # port stats
-                                                # h3("Vol min stats"),
-                                                # shinycssloaders::withSpinner(tableOutput("vopt_stat")),
-                                                 
-                                                 # Portfolio stats
-                                                # h3("Sharpe max stats"),
-                                                # shinycssloaders::withSpinner(tableOutput("vsharpe_stat")),
-                                                 
-                                                 # portfolio stats
-                                                # h3("Stortino max stats"),
-                                                # shinycssloaders::withSpinner(tableOutput("vsortino_stat")),
-                                                 
-                                                 #sortino
-                                                # h4("Sortino ratio"), 
-                                                # shinycssloaders::withSpinner(dataTableOutput("vsortino")),
-                                                 
-                                                 
-                                                  ),
-                                        tabPanel("Charts",
-                                                 
-                                                 # Stock Correlation 
-                                                 h4("Portfolio"),
-                                                 shinycssloaders::withSpinner(plotOutput("vpiechart")),
-                                                 
-                                                 # Stock Correlation 
-                                                 h4("Stock Correlation"),
-                                                 shinycssloaders::withSpinner(plotOutput("vcorr_plot")),
-                                                 
-                                                 # Returns histogram
-                                                 h4("Returns Histogram"),
-                                                 shinycssloaders::withSpinner(plotOutput("vreturns_hist")),
-                                                 
-                                                 # Stock price history
-                                                 h4("Stock Price History"),
-                                                 shinycssloaders::withSpinner(plotOutput("vstock_price_history")), 
-                                                 
-                                                 # Efficiency frontier
-                                                 h4("Efficiency Frontier"),
-                                                 shinycssloaders::withSpinner(plotOutput("vefficency_frontier")),
-                                                 
-                                                 # Comparison with S&P500
-                                                 h4("S&P500 Comparison"),
-                                                 shinycssloaders::withSpinner(plotOutput("vcompare_SP500"))
-                                                 ),
-                                      tabPanel("Extras", 
-                                              
-                                              h4("Soon to be added")))
-                                      
-                                      
-                                    # portfolio stats
-                      
-                                    
-                                    
-                                    
-                                    
-
-                                    
-                                    
-                                   
-                           ) # main panel
-              ) # tab panel
-              
-    , position = "fixed-top") 
-    # navbarPage
-    
-) # UI
-                
+  ),
   
-                
+  
+  navbarPage(title=div(img(src="Optimizer-logo2.png"), "Portfolio Optimizer"),
+             
+             tabPanel("Stock Selection",
+                      
+                      headerPanel('Find your optimal portofolio'),
+                      sidebarPanel(
+                        
+                        checkboxGroupInput("stockcategory", "Choose desired stock-types to choose from:",
+                                           choiceNames = 
+                                             list("Regular Stocks", "Sin-Stocks", "Green-Stocks", "Renewable-Stocks"),
+                                           choiceValues = 
+                                             list("1", "2", "3", "4")),
+                        
+                        actionButton("random", "Random stocks"), # Goal: Refresh a random selection of stocks within the selected categories
+                        
+                        selectInput("manual", "Select stocks", stocks_with_industry$Symbol, multiple = TRUE, selectize = TRUE),
+                        
+                        numericInput("rfrate", "Risk free rate: ", risk_free_rate,
+                                     min = 0, 
+                                     max = 1,
+                                     step = 0.001),
+                        
+                        
+                        dateInput("fromdate", "Date From: ", 
+                                  from_date,
+                                  min = "2007-08-01",
+                                  max = "2020-10-01",
+                                  format = "yyyy/mm/dd"
+                        ),
+                        dateInput("todate", "Date To: ",
+                                  to_date,
+                                  min = "2007-08-02",
+                                  max = "2020-10-01",
+                                  format = "yyyy/mm/dd"
+                        ),
+                        actionButton("update", "Update")),
+                      
+                      mainPanel(
+                        # -- Showing the outputs -- #
+                        
+                        # Optimal portofolio
+                        h3("Available Stocks"),
+                        shinycssloaders::withSpinner(dataTableOutput("vstock_list")))),
+             
+             tabPanel("Optimalization Method",
+                      headerPanel("Choose preffered optimalization method"),
+                      sidebarPanel(
+                        selectInput("method", "Optimalization method:",
+                                    c("Sharpe Ratio Maximizing", 
+                                      "Volatility Minimizing", 
+                                      "Sortino Ratio Maximizing"),
+                                    selected = "Sharpe Ratio Maximizing")), 
+                      
+                      
+                      
+                      mainPanel(
+                        h3("About the methods:"),
+                        
+                        h4("Maximizing Sharpe ratio: Maximizing the return/risk beyond the risk-free-rate"),
+                        p("+ Sharpe ratio ajust the portofolio based upon the risk beyond the risk-free-rate"),
+                        p("- Sharpe ratio assumes that investment returns are normal distributed, which is not always true"),
+                        p("- In the sharpe ratio risk is equal to volatility"),
+                        tags$a(href="https://www.investopedia.com/terms/s/sharperatio.asp", "Learn more about sharpe ratio"),
+                        
+                        h4("Minimizing Volatility: Minimizing the stocks swing around the mean price"),
+                        p("+ Creates a portofolio which is highly predictable and stable"),
+                        p("- You may miss out on higher returns due to the method not favouring sudden good or bad news"),
+                        tags$a(href="https://www.investopedia.com/terms/v/volatility.asp", "Learn more about volatility"),
+                        
+                        h4("Sortino: Differentating hearmful volatility from the total overall volatility"),
+                        p("+ Only considers the standard deviation of the downside risk, thus valuing positive volatility"),
+                        p("+ You get a maximized return from the downside risk"),
+                        tags$a(href="https://www.investopedia.com/terms/s/sortinoratio.asp", "Learn more about the sortino ratio")
+                        
+                      )),
+             
+             
+             
+             tabPanel("Results",
+                      headerPanel("Your optimal portofolio"),
+                      mainPanel(
+                        tabsetPanel(
+                          tabPanel("Portofolio stats",
+                                   
+                                   # Portfolio stats
+                                   h3("General Stats"),
+                                   shinycssloaders::withSpinner(tableOutput("stats")), # This needs to be dynamic and show the stats from the chosen method
+                                   
+                                   h3("Optimal Volume"),
+                                   shinycssloaders::withSpinner(dataTableOutput("volstats")),
+                                   
+                                   # port stats
+                                   # h3("Vol min stats"),
+                                   # shinycssloaders::withSpinner(tableOutput("vopt_stat")),
+                                   
+                                   # Portfolio stats
+                                   # h3("Sharpe max stats"),
+                                   # shinycssloaders::withSpinner(tableOutput("vsharpe_stat")),
+                                   
+                                   # portfolio stats
+                                   # h3("Stortino max stats"),
+                                   # shinycssloaders::withSpinner(tableOutput("vsortino_stat")),
+                                   
+                                   #sortino
+                                   # h4("Sortino ratio"), 
+                                   # shinycssloaders::withSpinner(dataTableOutput("vsortino")),
+                                   
+                                   
+                          ),
+                          tabPanel("Charts",
+                                   
+                                   # Stock Correlation 
+                                   h4("Portfolio"),
+                                   shinycssloaders::withSpinner(plotOutput("vpiechart")),
+                                   
+                                   # Stock Correlation 
+                                   h4("Stock Correlation"),
+                                   shinycssloaders::withSpinner(plotOutput("vcorr_plot")),
+                                   
+                                   # Returns histogram
+                                   h4("Returns Histogram"),
+                                   shinycssloaders::withSpinner(plotOutput("vreturns_hist")),
+                                   
+                                   # Stock price history
+                                   h4("Stock Price History"),
+                                   shinycssloaders::withSpinner(plotOutput("vstock_price_history")), 
+                                   
+                                   # Efficiency frontier
+                                   h4("Efficiency Frontier"),
+                                   shinycssloaders::withSpinner(plotOutput("vefficency_frontier")),
+                                   
+                                   # Comparison with S&P500
+                                   h4("S&P500 Comparison"),
+                                   shinycssloaders::withSpinner(plotOutput("vcompare_SP500"))
+                          ),
+                          tabPanel("Extras", 
+                                   
+                                   h4("Soon to be added")))
+                        
+                        
+                        # portfolio stats
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                      ) # main panel
+             ) # tab panel
+             
+             , position = "fixed-top"), 
+  # navbarPage
+  
+) # UI
+
+
+
 server <- function(input, output, session) {
   
   
@@ -294,7 +312,7 @@ server <- function(input, output, session) {
     }
   })
   
-
+  
   
   # Generate output for portfolio industry percentages
   output$vpiechart <- renderPlot({
@@ -323,13 +341,11 @@ server <- function(input, output, session) {
   })
   
   # Generate output for the S&P500 comparison
-   #-- Denne virker ikke etter oppdateringen av funksjonslisten
-  
-   output$vcompare_SP500 <- renderPlot({
+  output$vcompare_SP500 <- renderPlot({
     compare_SP500(as.matrix(sharpe_output()[[2]]), dataInput()[[1]], input$fromdate, input$todate)
   })
   
- 
+  
 }
 
 shinyApp(ui = ui, server = server) # Combine it into the app
