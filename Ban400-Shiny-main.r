@@ -68,11 +68,8 @@ ui <- fluidPage(
                       headerPanel('Find your optimal portofolio'),
                       sidebarPanel(
                         
-                        checkboxGroupInput("stockcategory", "Choose desired stock-types to choose from:",
-                                           choiceNames = 
-                                             list("Regular Stocks", "Sin-Stocks", "Green-Stocks", "Renewable-Stocks"),
-                                           choiceValues = 
-                                             list("1", "2", "3", "4")),
+                        selectInput("industry", "Select unfit industries:", stocks_with_industry$Industry, multiple = TRUE, selectize = TRUE
+                                           ),
                         
                         actionButton("random", "Random stocks"), # Goal: Refresh a random selection of stocks within the selected categories
                         
@@ -351,6 +348,4 @@ server <- function(input, output, session) {
 shinyApp(ui = ui, server = server) # Combine it into the app
 
 # Depending on the amount of stocks there can be some loading time (from 20 sec to 3 minutes)
-
-
 
