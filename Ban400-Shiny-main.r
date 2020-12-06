@@ -68,11 +68,15 @@ ui <- fluidPage(
                       headerPanel('Find your optimal portofolio'),
                       sidebarPanel(
                         
+                        numericInput("n_unique_stocks", "Amount of stocks in portfolio: ", 3,
+                                     min = 1, 
+                                     max = 50,
+                                     step = 1),
+                        
                         selectInput("industry", "Select unfit industries:", stocks_with_industry$Industry, multiple = TRUE, selectize = TRUE
-                                           ),
+                        ),
                         
-                        actionButton("random", "Random stocks"), # Goal: Refresh a random selection of stocks within the selected categories
-                        
+                        actionButton("random", "Get portfolio"), # Goal: Refresh a random selection of stocks within the selected categories
                         selectInput("manual", "Select stocks", stocks_with_industry$Symbol, multiple = TRUE, selectize = TRUE),
                         
                         numericInput("rfrate", "Risk free rate: ", risk_free_rate,
@@ -239,10 +243,19 @@ server <- function(input, output, session) {
   # Update stock_input with input from dateInput "fromdate" og "todate"
   # eventReactive means that it updates the function inputs every time user clicks the "update" button
   
+  observe({  # Update the choice list - currently only work when the user select one industry. It does not filter out if the user select more than one industry (needs to be fixed)
+    updateSelectInput(session, "manual", 
+                      choices = stocks_with_industry$Symbol[stocks_with_industry$Industry != input$industry]) # The user will not be able to chose a stock within the unwanted industry
+                      
+  })
   
-  updateSelectInput(session, "manual", 
-                    choices = stocks_with_industry$Symbol, # choices
-                    selected = sample(stocks_with_industry$Symbol, 10)) # sample 10 random stocks as default value
+  observeEvent(input$random, {  # Get random portfolio which does not include chosen undesired industry - the user can select the amount of stocks in the random portfolio
+    updateSelectInput(session, "manual",
+                      selected = sample(stocks_with_industry$Symbol[stocks_with_industry$Industry != input$industry], input$n_unique_stocks))
+  })
+
+  
+  
   
   tickers1 <- eventReactive(input$update, {
     input$manual
