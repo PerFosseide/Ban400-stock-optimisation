@@ -174,26 +174,38 @@ ui <- fluidPage(
                                    shinycssloaders::withSpinner(plotOutput("vpiechart")),
                                    
                                    # Stock Correlation 
-                                   h4("Stock Correlation"),
-                                   shinycssloaders::withSpinner(plotOutput("vcorr_plot")),
+                                  # h4("Stock Correlation"),
+                                  # shinycssloaders::withSpinner(plotOutput("vcorr_plot")),
                                    
                                    # Returns histogram
-                                   h4("Returns Histogram"),
-                                   shinycssloaders::withSpinner(plotOutput("vreturns_hist")),
+                                   #h4("Returns Histogram"),
+                                   #shinycssloaders::withSpinner(plotOutput("vreturns_hist")),
                                    
                                    # Stock price history
                                    h4("Stock Price History"),
                                    shinycssloaders::withSpinner(plotOutput("vstock_price_history")), 
                                    
                                    # Efficiency frontier
-                                   h4("Efficiency Frontier"),
-                                   shinycssloaders::withSpinner(plotOutput("vefficency_frontier")),
+                                   #h4("Efficiency Frontier"),
+                                   #shinycssloaders::withSpinner(plotOutput("vefficency_frontier")),
                                    
                                    # Comparison with S&P500
                                    h4("S&P500 Comparison"),
                                    shinycssloaders::withSpinner(plotOutput("vcompare_SP500"))
                           ),
                           tabPanel("Extras", 
+                                   
+                                   # Stock Correlation 
+                                   h4("Stock Correlation"),
+                                   shinycssloaders::withSpinner(plotOutput("vcorr_plot")),
+                                  
+                                    # Returns histogram
+                                   h4("Returns Histogram"),
+                                   shinycssloaders::withSpinner(plotOutput("vreturns_hist")),
+                                   
+                                   # Efficiency frontier
+                                   h4("Efficiency Frontier"),
+                                   shinycssloaders::withSpinner(plotOutput("vefficency_frontier")),
                                    
                                    h4("Soon to be added")))
                         
