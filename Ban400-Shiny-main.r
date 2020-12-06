@@ -243,15 +243,27 @@ server <- function(input, output, session) {
   # Update stock_input with input from dateInput "fromdate" og "todate"
   # eventReactive means that it updates the function inputs every time user clicks the "update" button
   
+#  observe({  # Update the choice list - currently only work when the user select one industry. It does not filter out if the user select more than one industry (needs to be fixed)
+#    updateSelectInput(session, "manual", 
+#                      choices = stocks_with_industry$Symbol[stocks_with_industry$Industry != input$industry]) # The user will not be able to chose a stock within the unwanted industry
+#                      
+#  })
+  
+  `%notin%` <- Negate(`%in%`) # Making an opposite of %in%
+  
+  choice1 <-  reactive({
+    stocks_with_industry$Symbol[stocks_with_industry$Industry %notin% input$industry]
+  })
+  
   observe({  # Update the choice list - currently only work when the user select one industry. It does not filter out if the user select more than one industry (needs to be fixed)
     updateSelectInput(session, "manual", 
-                      choices = stocks_with_industry$Symbol[stocks_with_industry$Industry != input$industry]) # The user will not be able to chose a stock within the unwanted industry
-                      
+                      choices = choice1()) # The user will not be able to chose a stock within the unwanted industry
+    
   })
   
   observeEvent(input$random, {  # Get random portfolio which does not include chosen undesired industry - the user can select the amount of stocks in the random portfolio
     updateSelectInput(session, "manual",
-                      selected = sample(stocks_with_industry$Symbol[stocks_with_industry$Industry != input$industry], input$n_unique_stocks))
+                      selected = sample(choice1(), input$n_unique_stocks))
   })
 
   
