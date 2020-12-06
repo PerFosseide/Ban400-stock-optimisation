@@ -315,8 +315,9 @@ compare_SP500 <- function(weigths, stocks, from_date, to_date) {
     scale_colour_manual("", 
                         breaks = c("SP500 perfomance", "Optimised portfolio performance"),
                         values = c("blue", "red")) +
-    labs(title = "Optimise portfolio VS S&P500 index")
-  
+    labs(title = "Optimise portfolio VS S&P500 index", subtitle = paste("Optimised period(left): ", from_date, "-", to_date, 
+                                                                  "\n", "Test Period(rigth):     ", to_date, "-", paste(Sys.Date()) ))
+   
   
   return(plot)
 }
