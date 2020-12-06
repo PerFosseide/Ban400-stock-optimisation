@@ -254,14 +254,14 @@ server <- function(input, output, session) {
   
   # Demo of output: 
   
-#  newchoices <- eventReactive(input$random, { # oppdater liste når en klikker "random" knappen
+#  newchoices <- eventReactive(input$random, { # oppdater liste nÃ¥r en klikker "random" knappen
 #    x <- input$industry
 #    n <- nrow(stocks_with_industry) - input$n_unique_stocks
     
 #    sample_function(n, filtered_industries = x)}, ignoreNULL = FALSE)
   
   
-#  output$test1 <- renderPrint({ # test for å vise output fra newchoices (kan ses nederst på optimization siden)
+#  output$test1 <- renderPrint({ # test for Ã¥ vise output fra newchoices (kan ses nederst pÃ¥ optimization siden)
 #    newchoices()})
   
   
@@ -281,13 +281,13 @@ server <- function(input, output, session) {
   
   ########################## Test 2 using reactive functions (did not work) ######################################################
   
-#  newchoices <- eventReactive(input$random, { # oppdater liste når en klikker "random" knappen
+#  newchoices <- eventReactive(input$random, { # oppdater liste nÃ¥r en klikker "random" knappen
 #    x <- input$industry
 #    n <- nrow(stocks_with_industry) - input$n_unique_stocks
     
 #    sample_function(n, filtered_industries = x)}, ignoreNULL = FALSE)
   
-#  newselection <- eventReactive(input$random, { # oppdater liste når en klikker "random" knappen
+#  newselection <- eventReactive(input$random, { # oppdater liste nÃ¥r en klikker "random" knappen
 #    x <- input$industry
 #    n <- input$n_unique_stocks
     
