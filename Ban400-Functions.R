@@ -47,6 +47,10 @@ sample_function <- function(number_of_stocks, selected_industries = c("ALL"), fi
       filter(!Industry %in% filtered_industries)
     
     return_stocks <- sample(x$Symbol,number_of_stocks)
+  } else if (filtered_industries[1] != "None") {
+    x <- stocks_with_industry %>% 
+      filter(!Industry %in% filtered_industries)
+    return_stocks <- sample(x$Symbol,number_of_stocks)
   }
   return(return_stocks)
   
