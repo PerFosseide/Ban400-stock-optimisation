@@ -16,7 +16,7 @@ library(TTR)
 library(RColorBrewer)
 library(htmlTable)
 
-knitr::opts_knit$set(dev.args = list(type = "cairo"))
+
 
 source("Ban400-Functions.R")
 
@@ -31,7 +31,7 @@ risk_free_rate <- 0.02
 
 
 tickers <- c("AAPL", "XOM", "BAC", "PFE", "NEE", "RTX", "GE", "REGN")
-from_date <- "2010-01-01"
+from_date <- "2018-01-01"
 to_date <- "2020-05-01"
 
 
@@ -42,13 +42,15 @@ to_date <- "2020-05-01"
 
 
 ```{r}
-tickers <- sample(stocks_with_industry$Symbol, 50)
+tickers <- sample_function(5,filtered_industries = c("Aluminum"))
+
+tickers
+
+plot_industries(input[[1]],)
+
+
 
 input <- input_function(tickers, from_date, to_date)
-
-
-plot_sectors(input[[1]])
-plot_industries(input[[1]])
 
 
 ```
@@ -80,7 +82,7 @@ opt_sharpe[[3]]
 
 #finds the portfolio with the lowest yearly volatility
 opt_vol <- stock_opt_vol(input[[1]],input[[7]],input[[3]],input[[6]])
-opt_vol[[2]]
+opt_vol[[4]]
 
 #find the portfolio with the higest sortino ratio
 opt_sortino <- stock_opt_sortino(input[[1]],input[[7]],input[[3]],input[[6]])
@@ -96,7 +98,7 @@ correlation_plot(input[[4]])
 stock_price_history(input[[2]])
 
 #Creates effeciency frontier
-efficency_frontier(input[[1]],input[[7]],input[[3]],input[[6]], n = 50000)
+efficency_frontier(input[[1]],input[[7]],input[[3]],input[[6]], n = 5000)
 
 
 
@@ -105,10 +107,9 @@ portfolio_industry(input[[1]], opt_sharpe[[2]])
 
 
 #tests the optimised portfolio vs the S&P500 index
-from_date <- "2020-08-01"
-to_date <- Sys.Date()
 
-compare_SP500((opt_vol[[2]]),input[[1]],input[[6]],from_date,to_date)
+
+compare_SP500((opt_vol[[2]]),input[[1]],from_date,to_date)
 
 ```
 
@@ -220,10 +221,59 @@ sin.stocks <- stocks_with_industry %>%
 
 ```{r}
 
+library(readxl)
+
+green <- read_excel("renewablestocks.xlsx")
+green <- green %>% 
+  select(Symbol) %>% 
+  mutate(ethics = "Marked as green stock")
+
+sin <- read_excel("sinstocks.xlsx")
+sin <- sin %>% 
+  select(Symbol) %>% 
+  mutate(ethics = "marked as unethical")
+
+test <-stocks_with_industry %>% 
+  left_join(sin, by = c("Symbol"= "Symbol")) %>% 
+  inner_join(green, by = c("Symbol" = "Symbol")) %>% 
+  replace_na(list(ethics = "netrual"))
 
 
+test <- (green$Symbol %in% stocks_with_industry$Symbol)
+test
+
+grep("TSLA", stocks_with_industry$Symbol)
+skim(test)
+
+grep(paste(green$Symbol, sep = "|", collapse = ""), green$Symbol)
+
+paste(green$Symbol, sep = "|", collapse = "")
+
+grep
+
+```
 
 
+```{r}
+#creates a histogram of the returns of portfolio
+returns_final_hist <- function(returns_matrix,weights) {
+  
+  skew <- round(skewness(returns_matrix%*%weights),3)
+  kurtosis <- round(kurtosis(returns_matrix%*%weights),3)
+ 
+  ret_final_hist <- as.data.frame(returns_matrix%*%weights) %>%
+    ggplot(aes(x = V1))+
+    geom_histogram(bins = 40, col = "black", fill = "steelblue")+
+    theme_classic() +
+    xlab("Returns") +
+    ylab("Count") +
+    theme(plot.title = element_text(color = "black"))+
+    labs(title = "Portfolio returns histogram", subtitle = paste("skewness: ", skew, ",  ", "kurtosis: ", kurtosis))
+  return(ret_final_hist)
+}
+
+hist <- returns_final_hist(input[[3]],input[[7]])
+hist 
 
 ```
 

@@ -177,9 +177,9 @@ ui <- fluidPage(
                                    h4("Portfolio"),
                                    shinycssloaders::withSpinner(plotOutput("vpiechart")),
                                    
-                                   # Stock Correlation 
-                                  # h4("Stock Correlation"),
-                                  # shinycssloaders::withSpinner(plotOutput("vcorr_plot")),
+                                    #portfolio returns historgram
+                                   h4("Portfolio returns histogram"),
+                                   shinycssloaders::withSpinner(plotOutput("vport_hist")),
                                    
                                    # Returns histogram
                                    #h4("Returns Histogram"),
@@ -377,6 +377,11 @@ server <- function(input, output, session) {
   # Generate output for the S&P500 comparison
   output$vcompare_SP500 <- renderPlot({
     compare_SP500(as.matrix(sharpe_output()[[2]]), dataInput()[[1]], input$fromdate, input$todate)
+  })
+  
+  # Generate output for the portfolio returns histogram
+  output$vport_hist <- renderPlot({
+    returns_final_hist(dataInput()[[3]],as.matrix(sharpe_output()[[2]]))
   })
   
   

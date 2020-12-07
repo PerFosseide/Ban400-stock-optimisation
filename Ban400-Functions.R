@@ -394,6 +394,24 @@ portfolio_industry <- function(stocks, weigths) {
   
 }
 
+#creates a histogram of the returns of portfolio
+returns_final_hist <- function(returns_matrix,weights) {
+  
+  skew <- round(skewness(returns_matrix%*%weights),3)
+  kurtosis <- round(kurtosis(returns_matrix%*%weights),3)
+  
+  ret_final_hist <- as.data.frame(returns_matrix%*%weights) %>%
+    ggplot(aes(x = V1))+
+    geom_histogram(bins = 40, col = "black", fill = "steelblue")+
+    theme_classic() +
+    xlab("Returns") +
+    ylab("Count") +
+    theme(plot.title = element_text(color = "black"))+
+    labs(title = "Portfolio returns histogram", subtitle = paste("skewness: ", skew, ",  ", "kurtosis: ", kurtosis))
+  return(ret_final_hist)
+}
+
+
 
 
 #####################################################################################################
