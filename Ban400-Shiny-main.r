@@ -277,7 +277,7 @@ server <- function(input, output, session) {
   }, ignoreNULL = FALSE)
   
   
-  risk_free_rate <- eventReactive(input$update, {
+  risk_free_rate <<-  eventReactive(input$update, {
     input$rfrate
   }, ignoreNULL = FALSE)
   
