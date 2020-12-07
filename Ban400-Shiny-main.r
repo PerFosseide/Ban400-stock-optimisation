@@ -35,7 +35,7 @@ source("Ban400-Functions.R")
 
 
 # Setting a default risk free rate
-risk_free_rate <- 0.03
+#risk_free_rate <- 0.03
 
 #tickersList <- stockSymbols()
 
@@ -80,7 +80,7 @@ ui <- fluidPage(
                         actionButton("random", "Get portfolio"), # Goal: Refresh a random selection of stocks within the selected categories
                         selectInput("manual", "Select stocks", stocks_with_industry$Symbol, multiple = TRUE, selectize = TRUE),
                         
-                        numericInput("rfrate", "Risk free rate: ", risk_free_rate,
+                        numericInput("rfrate", "Risk free rate: ", 0.02,
                                      min = 0, 
                                      max = 1,
                                      step = 0.001),
@@ -137,7 +137,8 @@ ui <- fluidPage(
                         h4("Sortino: Differentating hearmful volatility from the total overall volatility"),
                         p("+ Only considers the standard deviation of the downside risk, thus valuing positive volatility"),
                         p("+ You get a maximized return from the downside risk"),
-                        tags$a(href="https://www.investopedia.com/terms/s/sortinoratio.asp", "Learn more about the sortino ratio")
+                        tags$a(href="https://www.investopedia.com/terms/s/sortinoratio.asp", "Learn more about the sortino ratio"),
+                        verbatimTextOutput("rfvalue")
                         
                       )),
              
@@ -270,16 +271,24 @@ server <- function(input, output, session) {
   })
 
   
+  risk_free_rate <<- eventReactive(input$update, {
+    risk_free_rate <- input$rfrate
+  })
   
+  
+  # Test the output from risk free rate input (can be seen on "methods page)
+  output$rfvalue <- renderPrint({
+    risk_free_rate()
+  })
   
   tickers1 <- eventReactive(input$update, {
     input$manual
   }, ignoreNULL = FALSE)
   
   
-  risk_free_rate <- eventReactive(input$update, {
-    input$rfrate
-  }, ignoreNULL = FALSE)
+#  risk_free_rate <- eventReactive(input$update, {
+#    input$rfrate
+#  }, ignoreNULL = FALSE)
   
   
   # Go to next page when a confirming button is pressed

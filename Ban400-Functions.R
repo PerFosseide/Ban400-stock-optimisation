@@ -238,7 +238,7 @@ neg_sharpe_ef<- function(weigths, stock_returns, stock_cov) {
     x <- (stock_returns %*% weigths)
     avg_return <- mean(x)*251
     std <- sqrt(t(weigths)%*%(stock_cov%*%weigths))
-    score <- -(avg_return-risk_free_rate)/(std)
+    score <- -(avg_return-risk_free_rate())/(std)
     return(score)
 } 
 
@@ -437,7 +437,7 @@ portfolio_stats <- function(weigths, stock_returns, stock_cov) {
 #|Returns Sharpe Ratio, Std. deviation and returns|
 port_summary <- function(weigths, stock_return, stock_cov) {
   stats = portfolio_stats(weigths, stock_return, stock_cov)
-  sharpe_ratio = (stats$Avg_yearly_return-risk_free_rate)/
+  sharpe_ratio = (stats$Avg_yearly_return-risk_free_rate())/
     stats$Yearly_std
   stats$Sharpe_ratio = sharpe_ratio
   
@@ -491,7 +491,7 @@ neg_sharpe<- function(weigths, stock_returns, stock_cov) {
     x <- (stock_returns %*% weigths)
     avg_return <- mean(x)*251
     std <- sqrt(t(weigths)%*%(stock_cov%*%weigths))
-    score <- -(avg_return-risk_free_rate)/(std)
+    score <- -(avg_return-risk_free_rate())/(std)
     return(score)
   } 
   return(sharpe) 
@@ -612,7 +612,7 @@ sortino <- function(stock_return, weigths) {
     
     downside_std <- sqrt(t(weigths)%*%(cov_mat%*%weigths))
     
-    sortino_ratio <- -((mean_return-risk_free_rate)/downside_std)
+    sortino_ratio <- -((mean_return-risk_free_rate())/downside_std)
     return(sortino_ratio)
   }
   return(sortino_inner)
