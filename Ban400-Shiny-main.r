@@ -403,7 +403,7 @@ server <- function(input, output, session) {
   
   # Genereate output for the stock price history
   output$vstock_price_history <- renderPlot({
-    stock_price_history(dataInput()[[2]])
+    stock_price_history(dataInput()[[2]],input$fromdate, input$todate)
   })
   
   # Generate output for the efficiency frontier

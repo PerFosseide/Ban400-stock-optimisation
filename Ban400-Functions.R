@@ -221,7 +221,7 @@ correlation_plot <-function(stock_cor) {
 }
 
 #plots the price development of each stock 
-stock_price_history <- function(stock_prices) {
+stock_price_history <- function(stock_prices,from_date,to_date) {
   plot <- stock_prices %>%
     ggplot(aes(x = date, y = adjusted, color = symbol))+
     geom_line() +
