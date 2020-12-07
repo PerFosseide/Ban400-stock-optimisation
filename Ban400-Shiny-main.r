@@ -61,17 +61,18 @@ ui <- fluidPage(
   ),
   
   
-  navbarPage(title=div(img(src="Optimizer-logo2.png"), "Portfolio Optimizer"),
+  navbarPage(title=div(img(src="Optimizer-logo2.png"), "Portfolio Optimizer"), id = "tabset1",
              
              tabPanel("Stock Selection",
                       
                       headerPanel('Find your optimal portofolio'),
                       sidebarPanel(
                         
-                        numericInput("n_unique_stocks", "Amount of stocks in portfolio: ", 3,
+                        numericInput("n_unique_stocks", "Amount of stocks to select a portfolio from: ", 10,
                                      min = 1, 
-                                     max = 50,
+                                     max = 100,
                                      step = 1),
+                        actionButton("randomgreen", "Get Green Stocks Only"),
                         
                         selectInput("industry", "Select unfit industries:", stocks_with_industry$Industry, multiple = TRUE, selectize = TRUE
                         ),
@@ -85,13 +86,13 @@ ui <- fluidPage(
                                      step = 0.001),
                         
                         
-                        dateInput("fromdate", "Date From: ", 
+                        dateInput("fromdate", "Test-data from: ", 
                                   from_date,
                                   min = "2007-08-01",
                                   max = "2020-10-01",
                                   format = "yyyy/mm/dd"
                         ),
-                        dateInput("todate", "Date To: ",
+                        dateInput("todate", "Test-data to: ",
                                   to_date,
                                   min = "2007-08-02",
                                   max = "2020-10-01",
@@ -106,14 +107,16 @@ ui <- fluidPage(
                         h3("Available Stocks"),
                         shinycssloaders::withSpinner(dataTableOutput("vstock_list")))),
              
-             tabPanel("Optimalization Method",
+             tabPanel("Optimalization Method", value = "methodpanel",
                       headerPanel("Choose preffered optimalization method"),
                       sidebarPanel(
                         selectInput("method", "Optimalization method:",
                                     c("Sharpe Ratio Maximizing", 
                                       "Volatility Minimizing", 
                                       "Sortino Ratio Maximizing"),
-                                    selected = "Sharpe Ratio Maximizing")), 
+                                    selected = "Sharpe Ratio Maximizing"),
+                        actionButton("update2", "Confirm")), 
+                      
                       
                       
                       
@@ -140,7 +143,7 @@ ui <- fluidPage(
              
              
              
-             tabPanel("Results",
+             tabPanel("Results", value = "resultspanel",
                       headerPanel("Your optimal portofolio"),
                       mainPanel(
                         tabsetPanel(
@@ -279,6 +282,19 @@ server <- function(input, output, session) {
   }, ignoreNULL = FALSE)
   
   
+  # Go to next page when a confirming button is pressed
+  
+  observeEvent(input$update, {
+    updateTabsetPanel(session, "tabset1", 
+                      selected = "methodpanel")
+  })
+  
+  observeEvent(input$update2, {
+    updateTabsetPanel(session, "tabset1",
+                      selected = "resultspanel")
+  })
+  
+  
   
   # -- Making a general function for user inputs to be applied to stock_input
   
@@ -350,7 +366,17 @@ server <- function(input, output, session) {
   
   # Generate output for portfolio industry percentages
   output$vpiechart <- renderPlot({
-    portfolio_industry(dataInput()[[1]], (sharpe_output()[[2]]))
+    x <- input$method
+    if (x == "Sharpe Ratio Maximizing"){
+      portfolio_industry(dataInput()[[1]], (sharpe_output()[[2]]))
+    }
+    else if (x == "Sortino Ratio Maximizing"){
+      portfolio_industry(dataInput()[[1]], (sortino_output()[[2]]))
+    }
+    else{
+      portfolio_industry(dataInput()[[1]], (vol_output()[[2]]))
+    }
+
   })
   
   
@@ -376,7 +402,17 @@ server <- function(input, output, session) {
   
   # Generate output for the S&P500 comparison
   output$vcompare_SP500 <- renderPlot({
-    compare_SP500(as.matrix(sharpe_output()[[2]]), dataInput()[[1]], input$fromdate, input$todate)
+    x <- input$method
+    if (x == "Sharpe Ratio Maximizing"){
+      compare_SP500(as.matrix(sharpe_output()[[2]]), dataInput()[[1]], input$fromdate, input$todate)
+    }
+    else if (x == "Sortino Ratio Maximizing"){
+      compare_SP500(as.matrix(sortino_output()[[2]]), dataInput()[[1]], input$fromdate, input$todate)
+    }
+    else{
+      compare_SP500(as.matrix(vol_output()[[2]]), dataInput()[[1]], input$fromdate, input$todate)
+    }
+    
   })
   
   # Generate output for the portfolio returns histogram
