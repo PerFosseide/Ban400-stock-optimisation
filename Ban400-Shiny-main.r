@@ -72,6 +72,13 @@ ui <- fluidPage(
                                      min = 1, 
                                      max = 100,
                                      step = 1),
+                        
+                        numericInput("stockmax", "Max ratio of a stock in the portfolio:", 1,
+                                     step = 0.01
+                        ),
+                        numericInput("stockmin", "Min ratio of a stock in the portfolio", 0,
+                                     step = 0.01),
+                        
                         actionButton("randomgreen", "Get Green Stocks Only"),
                         
                         selectInput("industry", "Select unfit industries:", stocks_with_industry$Industry, multiple = TRUE, selectize = TRUE
@@ -269,8 +276,24 @@ server <- function(input, output, session) {
     updateSelectInput(session, "manual",
                       selected = sample(choice1(), input$n_unique_stocks))
   })
-
   
+  
+  # Update min value in numeric input based on the amount of stocks you select to the portfolio
+  observe({
+    updateNumericInput(session, "stockmax", 
+                       min = 1/input$n_unique_stocks,
+                       max = 1)
+  })
+  
+  # Update max value in numeric input based on the amount of stocks you select to the portfolio
+  observe({
+    updateNumericInput(session, "stockmin", 
+                       max = 1/input$n_unique_stocks,
+                       min = 0)
+                        
+  })
+
+  # Making the risk_free_rate global
   risk_free_rate <<- eventReactive(input$update, {
     risk_free_rate <- input$rfrate
   })
@@ -313,20 +336,20 @@ server <- function(input, output, session) {
   # -- Making another input function to be able to use subsets from the stock_opt_vol and stock_opt_sharpe functions.
   
   vol_output <- eventReactive(input$update, {
-    stock_opt_vol(dataInput()[[1]], dataInput()[[7]], dataInput()[[3]], dataInput()[[6]])
+    stock_opt_vol(dataInput()[[1]], dataInput()[[7]], dataInput()[[3]], dataInput()[[6]], input$stockmax, input$stockmin)
   }, ignoreNULL = FALSE)
   
   sharpe_output <- eventReactive(input$update, {
-    stock_opt_sharpe(dataInput()[[1]], dataInput()[[7]], dataInput()[[3]], dataInput()[[6]])
+    stock_opt_sharpe(dataInput()[[1]], dataInput()[[7]], dataInput()[[3]], dataInput()[[6]], input$stockmax, input$stockmin)
   }, ignoreNULL = FALSE)
   
   sortino_output <- eventReactive(input$update, {
-    stock_opt_sortino(dataInput()[[1]], dataInput()[[7]], dataInput()[[3]], dataInput()[[6]])
+    stock_opt_sortino(dataInput()[[1]], dataInput()[[7]], dataInput()[[3]], dataInput()[[6]], input$stockmax, input$stockmin)
   }, ignoreNULL = FALSE)
   
   ############ END OF INPUT PROCESSING ##########
   
-  
+
   
   
   ########### GENERATING OUTPUTS #############
@@ -367,7 +390,6 @@ server <- function(input, output, session) {
       vol_output()[[3]]
     }
   })
-  
   
   
   # Generate output for portfolio industry percentages
