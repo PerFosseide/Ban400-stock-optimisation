@@ -16,9 +16,6 @@ library(TTR)
 library(RColorBrewer)
 library(htmlTable)
 
-load("df1.Rdata")
-load("stock_info.Rdata")
-load("stocks_industry.Rdata")
 
 
 source("Ban400-Functions.R")
@@ -46,10 +43,6 @@ to_date <- "2020-05-01"
 
 ```{r}
 tickers <- sample_function(5,filtered_industries = c("Aluminum"))
-
-tickers
-
-plot_industries(input[[1]],)
 
 
 
@@ -93,9 +86,11 @@ opt_sortino[[1]]
 
 
 #creates returns histogram
-returns_hist(input[[5]])
+returns_hist(input[[5]], input[[1]])
 #creates correlation matrix
 correlation_plot(input[[4]])
+
+
 
 # creates stock price history graph
 stock_price_history(input[[2]])
@@ -223,49 +218,25 @@ sin.stocks <- stocks_with_industry %>%
 
 
 ```{r}
+#creates a histogram of the returns of each stock
+returns_hist <- function(stock_return) {
+  stock_return <- stock_return %>% 
+    group_by(symbol)
+  ret_hist <- stock_return %>%
+    ggplot(aes(x = return)) +
+    geom_histogram(bins = 50, color = "black") +
+    aes(fill = as.factor(symbol)) +
+    facet_wrap(~symbol, scales = 'free_y') +
+    theme_classic() +
+    xlab("Daily returns") +
+    scale_color_brewer(palette = "Set2") +
+    ylab("Count") +
+    theme(legend.position = "None", text = element_text(size=15))
+  return(ret_hist)
+}
 
-library(readxl)
-
-green <- read_excel("renewablestocks.xlsx")
-green <- green %>% 
-  select(Symbol) %>% 
-  mutate(ethics = "Marked as green stock")
-
-green$Symbol <- str_replace_all(green$Symbol, " ", "")
-green$Symbol <- str_extract(green$Symbol, "[A-Z]+")
-green$Symbol
-
-sin <- read_excel("sinstocks.xlsx")
-sin <- sin %>% 
-  select(Symbol) %>% 
-  mutate(ethics = "marked as unethical")
-
-stocks_with_industry <-stocks_with_industry %>% 
-  left_join(sin, by = c("Symbol"= "Symbol")) %>% 
-  left_join(green, by = c("Symbol" = "Symbol")) %>% 
-  replace_na(list(ethics.x = "")) %>%  
-  replace_na(list(ethics.y = "")) %>%  
-  mutate(Ethics = paste(ethics.x,ethics.y)) %>% 
-  select(-c(ethics.x,ethics.y)) %>% 
-  distinct(Symbol, .keep_all = T)
-
-  
-
-test <- (green$Symbol %in% stocks_with_industry$Symbol)
-test
-
-grep("TSLA", stocks_with_industry$Symbol)
-skim(test)
-
-grep(paste(green$Symbol, sep = "|", collapse = ""), green$Symbol)
-
-paste(green$Symbol, sep = "|", collapse = "")
-
-test <- match(green$Symbol, stocks_with_industry$Symbol, nomatch=0)
-
-
-save(stocks_with_industry, file = "stocks_industry.Rdata")
-
+theme(text = element_text(size=15))
+returns_hist(input[[5]])
 
 ```
 

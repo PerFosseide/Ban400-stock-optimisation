@@ -193,13 +193,19 @@ input_from_df <- function(stocks, from_date, to_date) {
 
 #creates a histogram of the returns of each stock
 returns_hist <- function(stock_return) {
+  stock_return <- stock_return %>% 
+    group_by(symbol)
   ret_hist <- stock_return %>%
-    ggplot(aes(x = return))+
-    geom_histogram(bins = 40) +
+    ggplot(aes(x = return)) +
+    geom_histogram(bins = 50, color = "black") +
+    aes(fill = as.factor(symbol)) +
     facet_wrap(~symbol, scales = 'free_y') +
     theme_classic() +
     xlab("Daily returns") +
-    ylab("Count")
+    scale_color_brewer(palette = "Set2") +
+    ylab("Count") +
+    theme(legend.position = "None") +
+    theme(text = element_text(size=15))
   return(ret_hist)
 }
 #creates a plot of all correaltions of the stocks  
@@ -229,7 +235,8 @@ stock_price_history <- function(stock_prices,from_date,to_date) {
     labs(title = "Adjusted stock returns over time",subtitle = paste(from_date, " to ",to_date, sep="")) +
     xlab("Years") +
     ylab("Adjusted returns") +
-    theme_classic()
+    theme_classic()+
+    theme(text = element_text(size=15))
   plot + theme(axis.text.x = element_blank())
 }
 
@@ -272,7 +279,8 @@ efficency_frontier <- function(tickers, weigths, returns_matrix, stock_cov, n = 
     labs(title = "Efficency frontier",
          subtitle = paste(tickers, collapse = ", ")) +
     xlab("Portfolio standard deviation") +
-    ylab("Portfolio expected return")
+    ylab("Portfolio expected return") +
+    theme(text = element_text(size=15))
   
   plot <- plot + scale_color_gradient(low="blue",
                               high ="red") +
@@ -316,7 +324,8 @@ compare_SP500 <- function(weigths, stocks, from_date, to_date) {
                         breaks = c("SP500 perfomance", "Optimised portfolio performance"),
                         values = c("blue", "red")) +
     labs(title = "Optimise portfolio VS S&P500 index", subtitle = paste("Optimised period(left): ", from_date, "-", to_date, 
-                                                                  "\n", "Test Period(rigth):     ", to_date, "-", paste(Sys.Date()) ))
+                                                                  "\n", "Test Period(rigth):     ", to_date, "-", paste(Sys.Date()) ))+
+    theme(text = element_text(size=15))
    
   
   return(plot)
@@ -339,7 +348,8 @@ plot_industries <- function(stocks) {
     theme_void() +  
     scale_fill_manual(values = mycolors) +
     
-    geom_text(aes(label = paste0(round((count/sum(count))*100), "%")), position = position_stack(vjust = 0.5))
+    geom_text(aes(label = paste0(round((count/sum(count))*100), "%")), position = position_stack(vjust = 0.5)) +
+    theme(text = element_text(size=18))
   
   plot + labs(fill = "Industries")
 }
@@ -360,7 +370,8 @@ plot_sectors <- function(stocks) {
     theme_void() +  
     scale_fill_manual(values = mycolors) +
     
-    geom_text(aes(label = paste0(round((count/sum(count))*100), "%")), position = position_stack(vjust = 0.5))
+    geom_text(aes(label = paste0(round((count/sum(count))*100), "%")), position = position_stack(vjust = 0.5)) +
+    theme(text = element_text(size=15))
   plot + labs(fill = "Sectors")
   
 }
@@ -388,8 +399,8 @@ portfolio_industry <- function(stocks, weigths) {
     theme_void() +  
     scale_fill_manual(values = mycolors) +
     
-    geom_text(aes(label = paste0((weigths*100), "%")), position = position_stack(vjust = 0.5))
-  
+    geom_text(aes(label = paste0((weigths*100), "%")), position = position_stack(vjust = 0.5)) +
+   theme(text = element_text(size=15))  
   plot + labs(fill = "Industries")
   
 }
@@ -407,7 +418,8 @@ returns_final_hist <- function(returns_matrix,weights) {
     xlab("Returns") +
     ylab("Count") +
     theme(plot.title = element_text(color = "black"))+
-    labs(title = "Portfolio returns histogram", subtitle = paste("skewness: ", skew, ",  ", "kurtosis: ", kurtosis))
+    labs(title = "Portfolio returns histogram", subtitle = paste("skewness: ", skew, ",  ", "kurtosis: ", kurtosis)) +
+    theme(text = element_text(size=15))
   return(ret_final_hist)
 }
 
