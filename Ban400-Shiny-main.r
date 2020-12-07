@@ -73,12 +73,6 @@ ui <- fluidPage(
                                      max = 100,
                                      step = 1),
                         
-                        numericInput("stockmax", "Max ratio of a stock in the portfolio:", 1,
-                                     step = 0.01
-                        ),
-                        numericInput("stockmin", "Min ratio of a stock in the portfolio", 0,
-                                     step = 0.01),
-                        
                         actionButton("randomgreen", "Get Green Stocks Only"),
                         
                         selectInput("industry", "Select unfit industries:", stocks_with_industry$Industry, multiple = TRUE, selectize = TRUE
@@ -115,13 +109,18 @@ ui <- fluidPage(
                         shinycssloaders::withSpinner(dataTableOutput("vstock_list")))),
              
              tabPanel("Optimalization Method", value = "methodpanel",
-                      headerPanel("Choose preffered optimalization method"),
+                      headerPanel("Choose optimalization method and constraints"),
                       sidebarPanel(
                         selectInput("method", "Optimalization method:",
                                     c("Sharpe Ratio Maximizing", 
                                       "Volatility Minimizing", 
                                       "Sortino Ratio Maximizing"),
                                     selected = "Sharpe Ratio Maximizing"),
+                        numericInput("stockmax", "Max ratio of a stock in the portfolio:", 1,
+                                     step = 0.01
+                        ),
+                        numericInput("stockmin", "Min ratio of a stock in the portfolio", 0,
+                                     step = 0.01),
                         actionButton("update2", "Confirm")), 
                       
                       
@@ -281,14 +280,14 @@ server <- function(input, output, session) {
   # Update min value in numeric input based on the amount of stocks you select to the portfolio
   observe({
     updateNumericInput(session, "stockmax", 
-                       min = 1/input$n_unique_stocks,
+                       min = 1/length(input$manual),
                        max = 1)
   })
   
   # Update max value in numeric input based on the amount of stocks you select to the portfolio
   observe({
     updateNumericInput(session, "stockmin", 
-                       max = 1/input$n_unique_stocks,
+                       max = 1/length(input$manual),
                        min = 0)
                         
   })
