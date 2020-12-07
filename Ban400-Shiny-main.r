@@ -137,8 +137,8 @@ ui <- fluidPage(
                         h4("Sortino: Differentating hearmful volatility from the total overall volatility"),
                         p("+ Only considers the standard deviation of the downside risk, thus valuing positive volatility"),
                         p("+ You get a maximized return from the downside risk"),
-                        tags$a(href="https://www.investopedia.com/terms/s/sortinoratio.asp", "Learn more about the sortino ratio"),
-                        verbatimTextOutput("rfvalue")
+                        tags$a(href="https://www.investopedia.com/terms/s/sortinoratio.asp", "Learn more about the sortino ratio")
+                       
                         
                       )),
              
@@ -275,11 +275,6 @@ server <- function(input, output, session) {
     risk_free_rate <- input$rfrate
   })
   
-  
-  # Test the output from risk free rate input (can be seen on "methods page)
-  output$rfvalue <- renderPrint({
-    risk_free_rate()
-  })
   
   tickers1 <- eventReactive(input$update, {
     input$manual
