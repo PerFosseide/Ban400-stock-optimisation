@@ -61,16 +61,16 @@ ui <- fluidPage(
   ),
   
   
-  navbarPage(title=div(img(src="Optimizer-logo2.png"), "Portfolio Optimizer"),
+  navbarPage(title=div(img(src="Optimizer-logo2.png"), "Portfolio Optimizer"), id = "tabset1",
              
              tabPanel("Stock Selection",
                       
                       headerPanel('Find your optimal portofolio'),
                       sidebarPanel(
                         
-                        numericInput("n_unique_stocks", "Amount of stocks in portfolio: ", 3,
+                        numericInput("n_unique_stocks", "Amount of stocks in portfolio: ", 5,
                                      min = 1, 
-                                     max = 50,
+                                     max = 100,
                                      step = 1),
                         
                         selectInput("industry", "Select unfit industries:", stocks_with_industry$Industry, multiple = TRUE, selectize = TRUE
@@ -85,13 +85,13 @@ ui <- fluidPage(
                                      step = 0.001),
                         
                         
-                        dateInput("fromdate", "Date From: ", 
+                        dateInput("fromdate", "Test-data from: ", 
                                   from_date,
                                   min = "2007-08-01",
                                   max = "2020-10-01",
                                   format = "yyyy/mm/dd"
                         ),
-                        dateInput("todate", "Date To: ",
+                        dateInput("todate", "Test-data to: ",
                                   to_date,
                                   min = "2007-08-02",
                                   max = "2020-10-01",
@@ -106,14 +106,16 @@ ui <- fluidPage(
                         h3("Available Stocks"),
                         shinycssloaders::withSpinner(dataTableOutput("vstock_list")))),
              
-             tabPanel("Optimalization Method",
+             tabPanel("Optimalization Method", value = "methodpanel",
                       headerPanel("Choose preffered optimalization method"),
                       sidebarPanel(
                         selectInput("method", "Optimalization method:",
                                     c("Sharpe Ratio Maximizing", 
                                       "Volatility Minimizing", 
                                       "Sortino Ratio Maximizing"),
-                                    selected = "Sharpe Ratio Maximizing")), 
+                                    selected = "Sharpe Ratio Maximizing"),
+                        actionButton("update2", "Confirm")), 
+                      
                       
                       
                       
@@ -140,7 +142,7 @@ ui <- fluidPage(
              
              
              
-             tabPanel("Results",
+             tabPanel("Results", value = "resultspanel",
                       headerPanel("Your optimal portofolio"),
                       mainPanel(
                         tabsetPanel(
@@ -277,6 +279,19 @@ server <- function(input, output, session) {
   risk_free_rate <- eventReactive(input$update, {
     input$rfrate
   }, ignoreNULL = FALSE)
+  
+  
+  # Go to next page when a confirming button is pressed
+  
+  observeEvent(input$update, {
+    updateTabsetPanel(session, "tabset1", 
+                      selected = "methodpanel")
+  })
+  
+  observeEvent(input$update2, {
+    updateTabsetPanel(session, "tabset1",
+                      selected = "resultspanel")
+  })
   
   
   
