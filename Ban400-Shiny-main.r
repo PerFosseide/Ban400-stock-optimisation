@@ -68,10 +68,11 @@ ui <- fluidPage(
                       headerPanel('Find your optimal portofolio'),
                       sidebarPanel(
                         
-                        numericInput("n_unique_stocks", "Amount of stocks in portfolio: ", 5,
+                        numericInput("n_unique_stocks", "Amount of stocks to select a portfolio from: ", 10,
                                      min = 1, 
                                      max = 100,
                                      step = 1),
+                        actionButton("randomgreen", "Get Green Stocks Only"),
                         
                         selectInput("industry", "Select unfit industries:", stocks_with_industry$Industry, multiple = TRUE, selectize = TRUE
                         ),
@@ -365,7 +366,17 @@ server <- function(input, output, session) {
   
   # Generate output for portfolio industry percentages
   output$vpiechart <- renderPlot({
-    portfolio_industry(dataInput()[[1]], (sharpe_output()[[2]]))
+    x <- input$method
+    if (x == "Sharpe Ratio Maximizing"){
+      portfolio_industry(dataInput()[[1]], (sharpe_output()[[2]]))
+    }
+    else if (x == "Sortino Ratio Maximizing"){
+      portfolio_industry(dataInput()[[1]], (sortino_output()[[2]]))
+    }
+    else{
+      portfolio_industry(dataInput()[[1]], (vol_output()[[2]]))
+    }
+
   })
   
   
@@ -391,7 +402,17 @@ server <- function(input, output, session) {
   
   # Generate output for the S&P500 comparison
   output$vcompare_SP500 <- renderPlot({
-    compare_SP500(as.matrix(sharpe_output()[[2]]), dataInput()[[1]], input$fromdate, input$todate)
+    x <- input$method
+    if (x == "Sharpe Ratio Maximizing"){
+      compare_SP500(as.matrix(sharpe_output()[[2]]), dataInput()[[1]], input$fromdate, input$todate)
+    }
+    else if (x == "Sortino Ratio Maximizing"){
+      compare_SP500(as.matrix(sortino_output()[[2]]), dataInput()[[1]], input$fromdate, input$todate)
+    }
+    else{
+      compare_SP500(as.matrix(vol_output()[[2]]), dataInput()[[1]], input$fromdate, input$todate)
+    }
+    
   })
   
   
