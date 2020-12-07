@@ -2,7 +2,7 @@
 
 ABOUT
 
-This is the readme file for our project in BAN 400
+This is the readme file for our project in BAN400
 
 The project idea is to create a shiny app where a user can determine the optimal stock portofolio from a larger set of stocks.
 
@@ -30,7 +30,7 @@ For BAN400 we are planning to do the following:
 - adjust the existing optimization
 - add error messages
 
-#3. Improve the imput
+#3. Improve the input
 - Broader input of stocks
 - Always use the latest available data, and dynamically respond to changes in the data (stocks arrive or dissappear).
 - Include classification of stocks (for instance to allow the user to exclude sin stocks or only include "green" stocks in a portofolio)
