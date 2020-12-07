@@ -228,7 +228,7 @@ correlation_plot <-function(stock_cor) {
 
 #plots the price development of each stock 
 stock_price_history <- function(stock_prices,from_date,to_date) {
-  plot <- stock_prices %>%
+  stock_prices %>%
     ggplot(aes(x = date, y = adjusted, color = symbol))+
     geom_line() +
     facet_wrap(~symbol, scales = 'free_y') +
@@ -237,7 +237,7 @@ stock_price_history <- function(stock_prices,from_date,to_date) {
     ylab("Adjusted returns") +
     theme_classic()+
     theme(text = element_text(size=15))
-  plot + theme(axis.text.x = element_blank())
+
 }
 
 #functions to calcualte values for random drawn portfolios(can't be used in optimisation)
@@ -413,7 +413,7 @@ returns_final_hist <- function(returns_matrix,weights) {
   
   ret_final_hist <- as.data.frame(returns_matrix%*%weights) %>%
     ggplot(aes(x = V1))+
-    geom_histogram(bins = 40, col = "black", fill = "skyblue4")+
+    geom_histogram(bins = 40, col = "black", fill = "steelblue3")+
     theme_classic() +
     xlab("Returns") +
     ylab("Count") +
