@@ -402,7 +402,7 @@ returns_final_hist <- function(returns_matrix,weights) {
   
   ret_final_hist <- as.data.frame(returns_matrix%*%weights) %>%
     ggplot(aes(x = V1))+
-    geom_histogram(bins = 40, col = "black", fill = "steelblue")+
+    geom_histogram(bins = 40, col = "black", fill = "skyblue4")+
     theme_classic() +
     xlab("Returns") +
     ylab("Count") +

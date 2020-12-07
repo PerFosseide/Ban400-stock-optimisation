@@ -16,6 +16,9 @@ library(TTR)
 library(RColorBrewer)
 library(htmlTable)
 
+load("df1.Rdata")
+load("stock_info.Rdata")
+load("stocks_industry.Rdata")
 
 
 source("Ban400-Functions.R")
@@ -228,16 +231,25 @@ green <- green %>%
   select(Symbol) %>% 
   mutate(ethics = "Marked as green stock")
 
+green$Symbol <- str_replace_all(green$Symbol, " ", "")
+green$Symbol <- str_extract(green$Symbol, "[A-Z]+")
+green$Symbol
+
 sin <- read_excel("sinstocks.xlsx")
 sin <- sin %>% 
   select(Symbol) %>% 
   mutate(ethics = "marked as unethical")
 
-test <-stocks_with_industry %>% 
+stocks_with_industry <-stocks_with_industry %>% 
   left_join(sin, by = c("Symbol"= "Symbol")) %>% 
-  inner_join(green, by = c("Symbol" = "Symbol")) %>% 
-  replace_na(list(ethics = "netrual"))
+  left_join(green, by = c("Symbol" = "Symbol")) %>% 
+  replace_na(list(ethics.x = "")) %>%  
+  replace_na(list(ethics.y = "")) %>%  
+  mutate(Ethics = paste(ethics.x,ethics.y)) %>% 
+  select(-c(ethics.x,ethics.y)) %>% 
+  distinct(Symbol, .keep_all = T)
 
+  
 
 test <- (green$Symbol %in% stocks_with_industry$Symbol)
 test
@@ -249,31 +261,16 @@ grep(paste(green$Symbol, sep = "|", collapse = ""), green$Symbol)
 
 paste(green$Symbol, sep = "|", collapse = "")
 
-grep
+test <- match(green$Symbol, stocks_with_industry$Symbol, nomatch=0)
+
+
+save(stocks_with_industry, file = "stocks_industry.Rdata")
+
 
 ```
 
 
 ```{r}
-#creates a histogram of the returns of portfolio
-returns_final_hist <- function(returns_matrix,weights) {
-  
-  skew <- round(skewness(returns_matrix%*%weights),3)
-  kurtosis <- round(kurtosis(returns_matrix%*%weights),3)
- 
-  ret_final_hist <- as.data.frame(returns_matrix%*%weights) %>%
-    ggplot(aes(x = V1))+
-    geom_histogram(bins = 40, col = "black", fill = "steelblue")+
-    theme_classic() +
-    xlab("Returns") +
-    ylab("Count") +
-    theme(plot.title = element_text(color = "black"))+
-    labs(title = "Portfolio returns histogram", subtitle = paste("skewness: ", skew, ",  ", "kurtosis: ", kurtosis))
-  return(ret_final_hist)
-}
-
-hist <- returns_final_hist(input[[3]],input[[7]])
-hist 
 
 ```
 
