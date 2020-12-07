@@ -238,7 +238,7 @@ neg_sharpe_ef<- function(weigths, stock_returns, stock_cov) {
     x <- (stock_returns %*% weigths)
     avg_return <- mean(x)*251
     std <- sqrt(t(weigths)%*%(stock_cov%*%weigths))
-    score <- -(avg_return-0.02)/(std)
+    score <- -(avg_return-risk_free_rate)/(std)
     return(score)
 } 
 
@@ -491,7 +491,7 @@ neg_sharpe<- function(weigths, stock_returns, stock_cov) {
     x <- (stock_returns %*% weigths)
     avg_return <- mean(x)*251
     std <- sqrt(t(weigths)%*%(stock_cov%*%weigths))
-    score <- -(avg_return-0.02)/(std)
+    score <- -(avg_return-risk_free_rate)/(std)
     return(score)
   } 
   return(sharpe) 
