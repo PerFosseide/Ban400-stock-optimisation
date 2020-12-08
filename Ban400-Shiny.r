@@ -122,7 +122,7 @@ ui <- fluidPage(
                                     selected = "Sharpe Ratio Maximizing"),
                         numericInput("numtest", "Test meg", value = 0.5, min = 0, max = 1, step = 0.1),
                         numericInput("stockmax", "Max ratio of a stock in the portfolio:", 
-                                     value = 1L,
+                                     value = 1,
                                      min = 0,
                                      max = 1,
                                      step = 0.01
