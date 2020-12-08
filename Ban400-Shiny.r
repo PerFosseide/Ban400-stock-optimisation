@@ -30,7 +30,7 @@ css2 <- HTML(" nav {
 # setting a global loading icon color
 options(spinner.color="#000000")
 
-source("Ban400-Functions.R")
+source("Ban400-Functions-old.R")
 
 
 
@@ -44,11 +44,6 @@ source("Ban400-Functions.R")
 # Setting a default date
 from_date <- "2018-08-01"
 to_date <- "2020-08-01"
-
-x1 <- 1
-x2 <- 0
-is.integer(x1)
-is.integer(x2)
 
 
 ui <- fluidPage(
@@ -120,7 +115,7 @@ ui <- fluidPage(
                                       "Volatility Minimizing", 
                                       "Sortino Ratio Maximizing"),
                                     selected = "Sharpe Ratio Maximizing"),
-                        numericInput("numtest", "Test meg", value = 0.5, min = 0, max = 1, step = 0.1),
+                        
                         numericInput("stockmax", "Max ratio of a stock in the portfolio:", 
                                      value = 1,
                                      min = 0,
@@ -133,9 +128,7 @@ ui <- fluidPage(
                                      min = 0,
                                      max = 1,
                                      step = 0.01),
-                        verbatimTextOutput("value"),
-                        verbatimTextOutput("value2"),
-                        verbatimTextOutput("value3"),
+                    
                         actionButton("update2", "Confirm")), 
                       
                       
@@ -160,7 +153,7 @@ ui <- fluidPage(
                         p("+ Only considers the standard deviation of the downside risk, thus valuing positive volatility"),
                         p("+ You get a maximized return from the downside risk"),
                         tags$a(href="https://www.investopedia.com/terms/s/sortinoratio.asp", "Learn more about the sortino ratio")
-                       
+                        
                         
                       )),
              
@@ -204,7 +197,7 @@ ui <- fluidPage(
                                    h4("Portfolio"),
                                    shinycssloaders::withSpinner(plotOutput("vpiechart")),
                                    
-                                    #portfolio returns historgram
+                                   #portfolio returns historgram
                                    h4("Portfolio returns histogram"),
                                    shinycssloaders::withSpinner(plotOutput("vport_hist")),
                                    
@@ -229,8 +222,8 @@ ui <- fluidPage(
                                    # Stock Correlation 
                                    h4("Stock Correlation"),
                                    shinycssloaders::withSpinner(plotOutput("vcorr_plot")),
-                                  
-                                    # Returns histogram
+                                   
+                                   # Returns histogram
                                    h4("Returns Histogram"),
                                    shinycssloaders::withSpinner(plotOutput("vreturns_hist")),
                                    
@@ -270,11 +263,11 @@ server <- function(input, output, session) {
   # Update stock_input with input from dateInput "fromdate" og "todate"
   # eventReactive means that it updates the function inputs every time user clicks the "update" button
   
-#  observe({  # Update the choice list - currently only work when the user select one industry. It does not filter out if the user select more than one industry (needs to be fixed)
-#    updateSelectInput(session, "manual", 
-#                      choices = stocks_with_industry$Symbol[stocks_with_industry$Industry != input$industry]) # The user will not be able to chose a stock within the unwanted industry
-#                      
-#  })
+  #  observe({  # Update the choice list - currently only work when the user select one industry. It does not filter out if the user select more than one industry (needs to be fixed)
+  #    updateSelectInput(session, "manual", 
+  #                      choices = stocks_with_industry$Symbol[stocks_with_industry$Industry != input$industry]) # The user will not be able to chose a stock within the unwanted industry
+  #                      
+  #  })
   
   `%notin%` <- Negate(`%in%`) # Making an opposite of %in%
   
@@ -293,15 +286,6 @@ server <- function(input, output, session) {
                       selected = sample(choice1(), input$n_unique_stocks))
   })
   
-  output$value <- renderText({
-    is.numeric(input$stockmax)
-  })
-  output$value2 <- renderText({
-    is.integer(input$stockmax)
-  })
-  output$value3 <- renderText({
-    input$stockmax
-  })
   
   
   # Update min value in numeric input based on the amount of stocks you select to the portfolio
@@ -316,9 +300,9 @@ server <- function(input, output, session) {
     updateNumericInput(session, "stockmin", 
                        max = 1/length(input$manual),
                        min = 0)
-                      
+    
   })
-
+  
   # Making the risk_free_rate global
   risk_free_rate <<- eventReactive(c(input$update, input$update2), {
     risk_free_rate <- input$rfrate
@@ -368,7 +352,7 @@ server <- function(input, output, session) {
   
   ############ END OF INPUT PROCESSING ##########
   
-
+  
   
   
   ########### GENERATING OUTPUTS #############
@@ -423,7 +407,7 @@ server <- function(input, output, session) {
     else{
       portfolio_industry(dataInput()[[1]], (vol_output()[[2]]))
     }
-
+    
   })
   
   
