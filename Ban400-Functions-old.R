@@ -193,13 +193,19 @@ input_from_df <- function(stocks, from_date, to_date) {
 
 #creates a histogram of the returns of each stock
 returns_hist <- function(stock_return) {
+  stock_return <- stock_return %>% 
+    group_by(symbol)
   ret_hist <- stock_return %>%
-    ggplot(aes(x = return))+
-    geom_histogram(bins = 40) +
+    ggplot(aes(x = return)) +
+    geom_histogram(bins = 50, color = "black") +
+    aes(fill = as.factor(symbol)) +
     facet_wrap(~symbol, scales = 'free_y') +
     theme_classic() +
     xlab("Daily returns") +
-    ylab("Count")
+    scale_color_brewer(palette = "Set2") +
+    ylab("Count") +
+    theme(legend.position = "None") +
+    theme(text = element_text(size=15))
   return(ret_hist)
 }
 #creates a plot of all correaltions of the stocks  
@@ -207,45 +213,46 @@ correlation_plot <-function(stock_cor) {
   col1 <- colorRampPalette(c("#7F0000", "red", "#FF7F00", "yellow",
                              "cyan", "#007FFF", "blue", "#00007F"))
   corrplot(stock_cor,
-         order = "FPC",
-         method = "number",
-         tl.pos = "d",
-         col = col1(100),
-         tl.col = "black",
-         cl.ratio = 0.2,
-         cl.align = "r",
-         type = "upper",
-         title = "Stock Correlation",
-         mar=c(0,0,2,0)
-)
+           order = "FPC",
+           method = "number",
+           tl.pos = "d",
+           col = col1(100),
+           tl.col = "black",
+           cl.ratio = 0.2,
+           cl.align = "r",
+           type = "upper",
+           title = "Stock Correlation",
+           mar=c(0,0,2,0)
+  )
 }
 
 #plots the price development of each stock 
 stock_price_history <- function(stock_prices,from_date,to_date) {
-  plot <- stock_prices %>%
+  stock_prices %>%
     ggplot(aes(x = date, y = adjusted, color = symbol))+
     geom_line() +
     facet_wrap(~symbol, scales = 'free_y') +
     labs(title = "Adjusted stock returns over time",subtitle = paste(from_date, " to ",to_date, sep="")) +
     xlab("Years") +
     ylab("Adjusted returns") +
-    theme_classic()
-  plot + theme(axis.text.x = element_blank())
+    theme_classic()+
+    theme(text = element_text(size=15))
+  
 }
 
 #functions to calcualte values for random drawn portfolios(can't be used in optimisation)
 neg_sharpe_ef<- function(weigths, stock_returns, stock_cov) {
-    x <- (stock_returns %*% weigths)
-    avg_return <- mean(x)*251
-    std <- sqrt(t(weigths)%*%(stock_cov%*%weigths))
-    score <- -(avg_return-risk_free_rate())/(std)
-    return(score)
+  x <- (stock_returns %*% weigths)
+  avg_return <- mean(x)*251
+  std <- sqrt(t(weigths)%*%(stock_cov%*%weigths))
+  score <- -(avg_return-risk_free_rate())/(std)
+  return(score)
 } 
 
 #functions to calcualte values for random drawn portfolios(can't be used in optimisation)
 min_vol_ef <- function(weigths,stock_returns, stock_cov) {
-    std <- sqrt(t(weigths)%*%(stock_cov%*%weigths))
-    return(std)
+  std <- sqrt(t(weigths)%*%(stock_cov%*%weigths))
+  return(std)
 }
 
 #drwas the effeciencyfrontier  
@@ -272,10 +279,11 @@ efficency_frontier <- function(tickers, weigths, returns_matrix, stock_cov, n = 
     labs(title = "Efficency frontier",
          subtitle = paste(tickers, collapse = ", ")) +
     xlab("Portfolio standard deviation") +
-    ylab("Portfolio expected return")
+    ylab("Portfolio expected return") +
+    theme(text = element_text(size=15))
   
   plot <- plot + scale_color_gradient(low="blue",
-                              high ="red") +
+                                      high ="red") +
     theme(text= element_text(size = 14))+
     labs(color = "Sharpe ratio")
   
@@ -316,8 +324,9 @@ compare_SP500 <- function(weigths, stocks, from_date, to_date) {
                         breaks = c("SP500 perfomance", "Optimised portfolio performance"),
                         values = c("blue", "red")) +
     labs(title = "Optimise portfolio VS S&P500 index", subtitle = paste("Optimised period(left): ", from_date, "-", to_date, 
-                                                                  "\n", "Test Period(rigth):     ", to_date, "-", paste(Sys.Date()) ))
-   
+                                                                        "\n", "Test Period(rigth):     ", to_date, "-", paste(Sys.Date()) ))+
+    theme(text = element_text(size=15))
+  
   
   return(plot)
 }
@@ -339,7 +348,8 @@ plot_industries <- function(stocks) {
     theme_void() +  
     scale_fill_manual(values = mycolors) +
     
-    geom_text(aes(label = paste0(round((count/sum(count))*100), "%")), position = position_stack(vjust = 0.5))
+    geom_text(aes(label = paste0(round((count/sum(count))*100), "%")), position = position_stack(vjust = 0.5)) +
+    theme(text = element_text(size=18))
   
   plot + labs(fill = "Industries")
 }
@@ -353,14 +363,15 @@ plot_sectors <- function(stocks) {
     mutate(count = n()) %>%
     distinct(Sector, count) %>%
     mutate(Sector = factor(x = Sector,
-                             levels = Sector)) %>% 
+                           levels = Sector)) %>% 
     ggplot(aes(x="", y = count, fill = reorder(Sector, -count))) +
     geom_bar(stat="identity", width=1, color="white") +
     coord_polar("y", start=0) +
     theme_void() +  
     scale_fill_manual(values = mycolors) +
     
-    geom_text(aes(label = paste0(round((count/sum(count))*100), "%")), position = position_stack(vjust = 0.5))
+    geom_text(aes(label = paste0(round((count/sum(count))*100), "%")), position = position_stack(vjust = 0.5)) +
+    theme(text = element_text(size=15))
   plot + labs(fill = "Sectors")
   
 }
@@ -373,7 +384,7 @@ portfolio_industry <- function(stocks, weigths) {
   
   port$weigths <- weigths
   
- plot <- port %>% 
+  plot <- port %>% 
     left_join(stocks_with_industry, by =  c("Symbol"="Symbol")) %>% 
     group_by(Industry) %>%
     mutate(weigths = round(weigths,2)) %>% 
@@ -388,8 +399,8 @@ portfolio_industry <- function(stocks, weigths) {
     theme_void() +  
     scale_fill_manual(values = mycolors) +
     
-    geom_text(aes(label = paste0((weigths*100), "%")), position = position_stack(vjust = 0.5))
-  
+    geom_text(aes(label = paste0((weigths*100), "%")), position = position_stack(vjust = 0.5)) +
+    theme(text = element_text(size=15))  
   plot + labs(fill = "Industries")
   
 }
@@ -402,16 +413,15 @@ returns_final_hist <- function(returns_matrix,weights) {
   
   ret_final_hist <- as.data.frame(returns_matrix%*%weights) %>%
     ggplot(aes(x = V1))+
-    geom_histogram(bins = 40, col = "black", fill = "skyblue4")+
+    geom_histogram(bins = 40, col = "black", fill = "steelblue3")+
     theme_classic() +
     xlab("Returns") +
     ylab("Count") +
     theme(plot.title = element_text(color = "black"))+
-    labs(title = "Portfolio returns histogram", subtitle = paste("skewness: ", skew, ",  ", "kurtosis: ", kurtosis))
+    labs(title = "Portfolio returns histogram", subtitle = paste("skewness: ", skew, ",  ", "kurtosis: ", kurtosis)) +
+    theme(text = element_text(size=15))
   return(ret_final_hist)
 }
-
-
 
 
 #####################################################################################################
