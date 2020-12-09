@@ -72,7 +72,10 @@ ui <- fluidPage(
                                      max = 100,
                                      step = 1),
                         
-                        actionButton("randomgreen", "Get Green Stocks Only"),
+                        selectInput("sinstock", "Avoid sinstocks?", c("Yes", "No"), "Yes"),
+                      
+                        
+                        selectInput("greenonly", "Green Stocks Only?", c("Yes", "No"), "No"),
                         
                         selectInput("industry", "Select unfit industries:", stocks_with_industry$Industry, multiple = TRUE, selectize = TRUE
                         ),
@@ -98,7 +101,7 @@ ui <- fluidPage(
                                   max = "2020-10-01",
                                   format = "yyyy/mm/dd"
                         ),
-                        actionButton("update", "Update")),
+                        actionButton("update", "Confirm Selection")),
                       
                       mainPanel(
                         # -- Showing the outputs -- #
@@ -271,9 +274,36 @@ server <- function(input, output, session) {
   
   `%notin%` <- Negate(`%in%`) # Making an opposite of %in%
   
-  choice1 <-  reactive({
-    stocks_with_industry$Symbol[stocks_with_industry$Industry %notin% input$industry]
+
+  # If sinstocks are unwanted -> make a subset of the dataframe without sinstocks
+  sin.choice <- reactive({
+    sinstocks <- c("marked as unethical ")
+    if (isTRUE(input$sinstock == "Yes")){
+      return(stocks_with_industry[stocks_with_industry$Ethics %notin% sinstocks,])
+
+    }
+    else{
+      return(stocks_with_industry[stocks_with_industry$Industry %notin% input$industry,])
+    }
   })
+  
+  # Incorporate the sinstock subset with the green.stock only choice 
+  choice1 <-  reactive({
+    if (isTRUE(input$greenonly == "Yes")){
+      sin.choice()$Symbol[sin.choice()$Ethics == " Marked as green stock" & sin.choice()$Industry %notin% input$industry]
+      
+    }
+    else{
+      sin.choice()$Symbol[sin.choice()$Industry %notin% input$industry]
+    }
+  })
+  
+
+  
+#  choice1 <-  reactive({
+#    stocks_with_industry$Symbol[stocks_with_industry$Industry %notin% input$industry]
+#  })
+  
   
   observe({  # Update the choice list - currently only work when the user select one industry. It does not filter out if the user select more than one industry (needs to be fixed)
     updateSelectInput(session, "manual", 
