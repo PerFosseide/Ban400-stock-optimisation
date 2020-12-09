@@ -208,9 +208,7 @@ ui <- fluidPage(
                                    #h4("Returns Histogram"),
                                    #shinycssloaders::withSpinner(plotOutput("vreturns_hist")),
                                    
-                                   # Stock price history
-                                   h4("Stock Price History"),
-                                   shinycssloaders::withSpinner(plotOutput("vstock_price_history")), 
+                                   
                                    
                                    # Efficiency frontier
                                    #h4("Efficiency Frontier"),
@@ -225,6 +223,10 @@ ui <- fluidPage(
                                    # Stock Correlation 
                                    h4("Stock Correlation"),
                                    shinycssloaders::withSpinner(plotOutput("vcorr_plot")),
+                                   
+                                   # Stock price history
+                                   h4("Stock Price History"),
+                                   shinycssloaders::withSpinner(plotOutput("vstock_price_history")), 
                                    
                                    # Returns histogram
                                    h4("Returns Histogram"),
@@ -443,17 +445,51 @@ server <- function(input, output, session) {
   
   # Generate output for the correlation plot
   output$vcorr_plot <- renderPlot({
-    correlation_plot(dataInput()[[4]])
+  x <- input$method
+  if (x == "Sharpe Ratio Maximizing"){
+    correlation_plot(sharpe_output()[[3]], input$fromdate, input$todate)
+  }
+  else if (x == "Sortino Ratio Maximizing"){
+    correlation_plot(sortino_output()[[3]], input$fromdate, input$todate)
+  }
+  else{
+    correlation_plot(vol_output()[[3]], input$fromdate, input$todate)
+  }
+  
   })
+    
+    
+
   
   # Generate output for the returns histogram
   output$vreturns_hist <- renderPlot({
-    returns_hist(dataInput()[[5]])
+      x <- input$method
+      if (x == "Sharpe Ratio Maximizing"){
+        returns_hist(dataInput()[[5]], sharpe_output()[[3]])
+      }
+      else if (x == "Sortino Ratio Maximizing"){
+        returns_hist(dataInput()[[5]],sortino_output()[[3]])
+      }
+      else{
+        returns_hist(dataInput()[[5]],vol_output()[[3]])
+      }
+      
   })
+    
   
   # Genereate output for the stock price history
   output$vstock_price_history <- renderPlot({
-    stock_price_history(dataInput()[[2]],input$fromdate, input$todate)
+    x <- input$method
+    if (x == "Sharpe Ratio Maximizing"){
+      stock_price_history(dataInput()[[2]],sharpe_output()[[3]],input$fromdate, input$todate)
+    }
+    else if (x == "Sortino Ratio Maximizing"){
+      stock_price_history(dataInput()[[2]],sortino_output()[[3]],input$fromdate, input$todate)
+    }
+    else{
+      stock_price_history(dataInput()[[2]],vol_output()[[3]],input$fromdate, input$todate)
+    }
+    
   })
   
   # Generate output for the efficiency frontier

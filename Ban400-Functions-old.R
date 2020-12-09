@@ -192,9 +192,11 @@ input_from_df <- function(stocks, from_date, to_date) {
 #############################################################################################################################
 
 #creates a histogram of the returns of each stock
-returns_hist <- function(stock_return) {
+returns_hist <- function(stock_return, chosen_stocks) {
   stock_return <- stock_return %>% 
-    group_by(symbol)
+  group_by(symbol) %>%
+  filter(symbol %in% chosen_stocks$Symbol)
+  
   ret_hist <- stock_return %>%
     ggplot(aes(x = return)) +
     geom_histogram(bins = 50, color = "black") +
@@ -209,7 +211,12 @@ returns_hist <- function(stock_return) {
   return(ret_hist)
 }
 #creates a plot of all correaltions of the stocks  
-correlation_plot <-function(stock_cor) {
+correlation_plot <-function(chosen_stocks, from_date, to_date) {
+  tickers <- chosen_stocks$Symbol
+  stocks <- input_function(tickers, from_date, to_date)
+  stock_cor <- stocks[[4]]
+  
+  
   col1 <- colorRampPalette(c("#7F0000", "red", "#FF7F00", "yellow",
                              "cyan", "#007FFF", "blue", "#00007F"))
   corrplot(stock_cor,
@@ -221,13 +228,17 @@ correlation_plot <-function(stock_cor) {
            cl.ratio = 0.2,
            cl.align = "r",
            type = "upper",
-           title = "Stock Correlation",
+           title = "Portfolio Stock Correlation",
            mar=c(0,0,2,0)
   )
 }
 
 #plots the price development of each stock 
-stock_price_history <- function(stock_prices,from_date,to_date) {
+stock_price_history <- function(stock_prices,chosen_stocks,from_date,to_date) {
+  stock_prices <-  stock_prices %>% 
+    group_by(symbol) %>%
+    filter(symbol %in% chosen_stocks$Symbol)
+  
   stock_prices %>%
     ggplot(aes(x = date, y = adjusted, color = symbol))+
     geom_line() +
