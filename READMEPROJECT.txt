@@ -19,3 +19,27 @@ files for functions and the shiny app script. If all the files are downloaded,
 the main files will collect the information you need from the sub files. There 
 are two important main files. One for the the solution and results in R Markdown, 
 and one for the Shiny app.
+
+Explanation of the different files:
+#Ban400-functions.R: 
+- Include all functions needed to calculate or plot results. This file also loads
+  all the data from the three Rdata-files to get results.
+
+#df1.Rdata:
+- Includes the return of a set of stocks at different dates.
+
+#stock_info.Rdata:
+- Includes information about different stocks, like symbol, exchange and category.
+  It also adds max and min date, and all stock symbols placed in a character vector.
+
+#stocks_industry.Rdata:
+- Adds a dataframe with information about the industry of each stock.
+
+#Ban400_markdown.Rmd:
+- The main file that shows results in numbers and graphs by using the functions from
+  the functions-file. 
+
+#Ban400-Shiny.r:
+- The script to open and run the Shiny app. It is based on results and calculations in 
+  the other scripts, and make it possible to select the stocks you wish to include in
+  your portfolio. 
