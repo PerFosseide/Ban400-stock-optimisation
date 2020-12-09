@@ -542,7 +542,7 @@ stock_opt_sharpe <- function(tickers, weigths ,returns,cov_matrix,  upper_bounds
   
   stocks <- as.data.frame(t(max_sharpe_port)) %>% 
     arrange(desc(V1)) %>% 
-    filter(V1>0) %>% 
+    filter(abs(V1)>0.001) %>% 
     mutate(Symbol = row.names(.)) %>%  
     left_join(stock_info, by=c("Symbol"="Symbol")) %>% 
     rename("Percentage" = "V1") %>% 
@@ -557,7 +557,10 @@ stock_opt_sharpe <- function(tickers, weigths ,returns,cov_matrix,  upper_bounds
   
   stats <- max_sharpe_port %>% 
     select(Sharpe_ratio, Yearly_std, mean_return)
+  names <- c("Sharpe Ratio", "Yearly Standard Deviation","Avarge Yearly Return")
   
+  colnames(stats) <- names
+   
   result <- list(max_sharpe_port, sharpe$par, stocks,stats)
   
   return(result)
@@ -584,7 +587,7 @@ stock_opt_vol <- function(tickers, weigths ,returns,cov_matrix,  upper_bounds = 
   colnames(min_vol_port) <- tickers
   stocks <- as.data.frame(t(min_vol_port)) %>% 
     arrange(desc(V1)) %>% 
-    filter(V1>0) %>% 
+    filter(abs(V1)>0.001) %>% 
     mutate(Symbol = row.names(.)) %>%  
     left_join(stock_info, by=c("Symbol"="Symbol")) %>% 
     rename("Percentage" = "V1") %>% 
@@ -598,6 +601,10 @@ stock_opt_vol <- function(tickers, weigths ,returns,cov_matrix,  upper_bounds = 
   
   stats <- min_vol_port %>% 
     select(Sharpe_ratio, Yearly_std, mean_return)
+  names <- c("Sharpe Ratio", "Yearly Standard Deviation","Avarge Yearly Return")
+  
+  colnames(stats) <- names
+  
   
   
   result <- list(min_vol_port, min_vol$par, stocks, stats)
@@ -649,7 +656,7 @@ stock_opt_sortino <- function(tickers, weigths,stock_return, cov_matrix,  upper_
   colnames(max_sortino_port) <- tickers
   stocks <- as.data.frame(t(max_sortino_port)) %>% 
     arrange(desc(V1)) %>% 
-    filter(V1>0) %>% 
+    filter(abs(V1)>0.001) %>% 
     mutate(Symbol = row.names(.)) %>%  
     left_join(stock_info, by=c("Symbol"="Symbol")) %>% 
     rename("Percentage" = "V1") %>% 
@@ -664,6 +671,10 @@ stock_opt_sortino <- function(tickers, weigths,stock_return, cov_matrix,  upper_
   
   stats <- max_sortino_port %>% 
     select(Sharpe_ratio, Yearly_std, mean_return)
+  names <- c("Sharpe Ratio", "Yearly Standard Deviation","Avarge Yearly Return")
+  
+  colnames(stats) <- names
+  
   
   
   result <- list(max_sortino_port, sortino_opt$par, stocks, stats)
