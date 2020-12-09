@@ -15,4 +15,7 @@ selecting the optimalization, and one to see the results represented in
 graphs and charts.
 
 In the project, we have chosen to have one master R. file and several sub 
-files for functions and the shiny app script. 
+files for functions and the shiny app script. If all the files are downloaded,
+the main files will collect the information you need from the sub files. There 
+are two important main files. One for the the solution and results in R Markdown, 
+and one for the Shiny app.
