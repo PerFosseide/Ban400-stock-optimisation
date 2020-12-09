@@ -111,8 +111,10 @@ ui <- fluidPage(
                         shinycssloaders::withSpinner(dataTableOutput("vstock_list")))),
              
              tabPanel("Optimalization Method", value = "methodpanel",
-                      headerPanel("Choose optimalizationasdfasdf"),
+                      headerPanel("Choose optimalizations and constraints"),
                       sidebarPanel(
+                        selectInput("shorting", "Allow for shorting?",
+                                    c("Yes", "No"), selected = "Yes"),
                         selectInput("method", "Optimalization method:",
                                     c("Sharpe Ratio Maximizing", 
                                       "Volatility Minimizing", 
@@ -322,16 +324,39 @@ server <- function(input, output, session) {
   
   # Update min value in numeric input based on the amount of stocks you select to the portfolio
   observe({
-    updateNumericInput(session, "stockmax", 
-                       min = 1/length(input$manual),
-                       max = 1)
+    if (isTRUE(input$shorting == "Yes")){
+      updateNumericInput(session, "stockmax", 
+                         value = -1,
+                         min = -1,
+                         max = 1)
+      
+    }
+    else{
+      updateNumericInput(session, "stockmax", 
+                         value = 1,
+                         min = 1/length(input$manual),
+                         max = 1)
+    }
   })
   
   # Update max value in numeric input based on the amount of stocks you select to the portfolio
   observe({
-    updateNumericInput(session, "stockmin", 
-                       max = 1/length(input$manual),
-                       min = 0)
+    
+    if (isTRUE(input$shorting == "Yes")){
+      updateNumericInput(session, "stockmin",
+                         value = 0,
+                         max = 1,
+                         min = -1,
+                         )
+
+      
+    }
+    else{
+      updateNumericInput(session, "stockmin", 
+                         value = 0,
+                         max = 1/length(input$manual),
+                         min = 0)
+    }
     
   })
   
