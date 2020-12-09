@@ -326,8 +326,8 @@ server <- function(input, output, session) {
   observe({
     if (isTRUE(input$shorting == "Yes")){
       updateNumericInput(session, "stockmax", 
-                         value = -1,
-                         min = -1,
+                         value = 1,
+                         min = 1,
                          max = 1)
       
     }
@@ -344,8 +344,8 @@ server <- function(input, output, session) {
     
     if (isTRUE(input$shorting == "Yes")){
       updateNumericInput(session, "stockmin",
-                         value = 0,
-                         max = 1,
+                         value = -1,
+                         max = -1,
                          min = -1,
                          )
 
