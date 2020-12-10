@@ -2,7 +2,7 @@
 ########## README PROJECT ##########
 
 In this project we create a shiny app where the user has the opportunity to
-determine the optimal stock portfolio form a large set of stocks. The user 
+determine the optimal stock portfolio from a large set of stocks. The user 
 can choose to exclude sin stocks, or to only include green stocks.
 
 The set of stocks is collected form Yahoo Finance. The lists of sin stocks 
