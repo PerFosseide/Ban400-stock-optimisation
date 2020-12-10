@@ -77,11 +77,21 @@ ui <- fluidPage(
                                      step = 1),
                         
                         selectInput("sinstock", "Avoid sinstocks?", c("Yes", "No"), "Yes"),
-                      
+                        
                         
                         selectInput("greenonly", "Green Stocks Only?", c("Yes", "No"), "No"),
                         
-                        selectInput("industry", "Select unfit industries:", stocks_with_industry$Industry, multiple = TRUE, selectize = TRUE
+                        selectInput("selectionType", "Select unfit industries or select industries?", c("Select industries", "Select unfit industries")),
+                        
+                        # These panels will only show based upon selection of "selectionType"
+                        conditionalPanel(
+                          condition = "input.selectionType == 'Select unfit industries'",
+                          selectInput("industry", "Select unfit industries:", stocks_with_industry$Industry, multiple = TRUE, selectize = TRUE
+                          )),
+                        conditionalPanel(
+                          condition = "input.selectionType == 'Select industries'",
+                          selectInput("industrySelect", "Select industries to invest in: ", stocks_with_industry$Industry, multiple = TRUE, selectize = TRUE)
+                          
                         ),
                         
                         actionButton("random", "Get portfolio"), # Goal: Refresh a random selection of stocks within the selected categories
@@ -137,7 +147,7 @@ ui <- fluidPage(
                                      min = 0,
                                      max = 1,
                                      step = 0.01),
-                    
+                        
                         actionButton("update2", "Confirm")), 
                       
                       
@@ -295,7 +305,7 @@ server <- function(input, output, session) {
     else if(input$n_unique_stocks > max_stockselection){
       showNotification(id = "above100", "Please select less than 100 stocks", type = "error")
     }
-  
+    
     else{
       NULL
     }
@@ -310,14 +320,14 @@ server <- function(input, output, session) {
     }
   })
   
-#  observe({
-#    if (!isTruthy(input$manual)){
-#      showNotification(id = "noStocks", "Please select stocks", type = "default")
-#    }
-#    else{
-#      NULL
-#    }
-#  })
+  #  observe({
+  #    if (!isTruthy(input$manual)){
+  #      showNotification(id = "noStocks", "Please select stocks", type = "default")
+  #    }
+  #    else{
+  #      NULL
+  #    }
+  #  })
   
   # Warning 2 - No from or to date
   observe({
@@ -339,38 +349,55 @@ server <- function(input, output, session) {
   })
   
   
- 
   
   
-
+  
+  
   # If sinstocks are unwanted -> make a subset of the dataframe without sinstocks
   sin.choice <- reactive({
     sinstocks <- c("marked as unethical ")
+    
     if (isTRUE(input$sinstock == "Yes")){
       return(stocks_with_industry[stocks_with_industry$Ethics %notin% sinstocks,])
-
     }
     else{
-      return(stocks_with_industry[stocks_with_industry$Industry %notin% input$industry,])
+      if(isTRUE(input$selectionType == "Select unfit industries")){
+        return(stocks_with_industry[stocks_with_industry$Industry %notin% input$industry,])
+      }
+      else{
+        return(stocks_with_industry[stocks_with_industry$Industry %in% input$industrySelect,])
+      }
+      
     }
   })
   
   # Incorporate the sinstock subset with the green.stock only choice 
   choice1 <-  reactive({
     if (isTRUE(input$greenonly == "Yes")){
-      sin.choice()$Symbol[sin.choice()$Ethics == " Marked as green stock" & sin.choice()$Industry %notin% input$industry]
+      if(isTRUE(input$selectionType == "Select unfit industries")){
+        
+        sin.choice()$Symbol[sin.choice()$Ethics == " Marked as green stock" & sin.choice()$Industry %notin% input$industry]
+      }
+      else{
+        sin.choice()$Symbol[sin.choice()$Ethics == " Marked as green stock" & sin.choice()$Industry %in% input$industrySelect]
+      }
       
     }
     else{
-      sin.choice()$Symbol[sin.choice()$Industry %notin% input$industry]
+      if(isTRUE(input$selectionType == "Select unfit industries")){
+        sin.choice()$Symbol[sin.choice()$Industry %notin% input$industry]
+      }
+      else{
+        sin.choice()$Symbol[sin.choice()$Industry %in% input$industrySelect]
+      }
     }
   })
   
-
   
-#  choice1 <-  reactive({
-#    stocks_with_industry$Symbol[stocks_with_industry$Industry %notin% input$industry]
-#  })
+  
+  #  choice1 <-  reactive({
+  #    stocks_with_industry$Symbol[stocks_with_industry$Industry %notin% input$industry]
+  #  })
   
   
   observe({  # Update the choice list - currently only work when the user select one industry. It does not filter out if the user select more than one industry (needs to be fixed)
@@ -412,8 +439,8 @@ server <- function(input, output, session) {
                          value = -1,
                          max = -1,
                          min = -1,
-                         )
-
+      )
+      
       
     }
     else{
@@ -560,21 +587,21 @@ server <- function(input, output, session) {
       need(isTruthy(input$todate), "Please input a valid date at the stock selection page")
     )
     
-  x <- input$method
-  if (x == "Sharpe Ratio Maximizing"){
-    correlation_plot(sharpe_output()[[3]], input$fromdate, input$todate)
-  }
-  else if (x == "Sortino Ratio Maximizing"){
-    correlation_plot(sortino_output()[[3]], input$fromdate, input$todate)
-  }
-  else{
-    correlation_plot(vol_output()[[3]], input$fromdate, input$todate)
-  }
-  
+    x <- input$method
+    if (x == "Sharpe Ratio Maximizing"){
+      correlation_plot(sharpe_output()[[3]], input$fromdate, input$todate)
+    }
+    else if (x == "Sortino Ratio Maximizing"){
+      correlation_plot(sortino_output()[[3]], input$fromdate, input$todate)
+    }
+    else{
+      correlation_plot(vol_output()[[3]], input$fromdate, input$todate)
+    }
+    
   })
-    
-    
-
+  
+  
+  
   
   # Generate output for the returns histogram
   output$vreturns_hist <- renderPlot({
@@ -584,19 +611,19 @@ server <- function(input, output, session) {
       need(isTruthy(input$fromdate), "Please input a valid date at the stock selection page"),
       need(isTruthy(input$todate), "Please input a valid date at the stock selection page")
     )
-      x <- input$method
-      if (x == "Sharpe Ratio Maximizing"){
-        returns_hist(dataInput()[[5]], sharpe_output()[[3]])
-      }
-      else if (x == "Sortino Ratio Maximizing"){
-        returns_hist(dataInput()[[5]],sortino_output()[[3]])
-      }
-      else{
-        returns_hist(dataInput()[[5]],vol_output()[[3]])
-      }
-      
-  })
+    x <- input$method
+    if (x == "Sharpe Ratio Maximizing"){
+      returns_hist(dataInput()[[5]], sharpe_output()[[3]])
+    }
+    else if (x == "Sortino Ratio Maximizing"){
+      returns_hist(dataInput()[[5]],sortino_output()[[3]])
+    }
+    else{
+      returns_hist(dataInput()[[5]],vol_output()[[3]])
+    }
     
+  })
+  
   
   # Genereate output for the stock price history
   output$vstock_price_history <- renderPlot({
