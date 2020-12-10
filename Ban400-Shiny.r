@@ -473,8 +473,24 @@ server <- function(input, output, session) {
   # Go to next page when a confirming button is pressed
   
   observeEvent(input$update, {
-    updateTabsetPanel(session, "tabset1", 
-                      selected = "methodpanel")
+    
+    if (!isTruthy(input$rfrate)){
+      showNotification("Please write a valid risk free rate", type = "error")
+    }
+    else if (!isTruthy(input$fromdate)){
+      showNotification("Please write a valid date", type = "error")
+    }
+    else if(!isTruthy(input$todate)){
+      showNotification("Please write a valid date", type = "error")
+    }
+    else if(!isTruthy(input$manual)){
+      showNotification("Please choose at least 1 stock", type = "error")
+    }
+    else{
+      updateTabsetPanel(session, "tabset1", 
+                        selected = "methodpanel")
+    }
+  
   })
   
   observeEvent(input$update2, {
