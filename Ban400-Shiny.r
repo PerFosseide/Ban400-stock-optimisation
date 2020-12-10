@@ -27,21 +27,12 @@ css2 <- HTML(" nav {
 }")
 
 
-
 # setting a global loading icon color
 options(spinner.color="#000000")
 
 source("Ban400-Functions-old.R")
 
 
-
-# Setting a default risk free rate
-#risk_free_rate <- 0.03
-
-#tickersList <- stockSymbols()
-
-#tickers <- c("AAPL", "XOM", "BAC", "PFE", "NEE", "RTX")
-#tickers <- sample_function(10)
 # Setting a default date
 from_date <- "2018-08-01"
 to_date <- "2020-08-01"
@@ -55,16 +46,8 @@ ui <- fluidPage(
   tags$header(tags$style(css2)),
   theme = shinytheme("cosmo"),
   
-  list(tags$head(HTML('<link rel="icon", href="Optimizer-logo2.png", 
-                                   type="image/png" />'))),
-  div(style="padding: 1px 0px; width: '100%'",
-      titlePanel(
-        title="", windowTitle="Portfolio Optimizer"
-      )
-  ),
   
-  
-  navbarPage(title=div(img(src="Optimizer-logo2.png"), "Portfolio Optimizer"), id = "tabset1",
+  navbarPage(title="Portfolio Optimizer", id = "tabset1",
              
              tabPanel("Stock Selection",
                       
@@ -81,7 +64,9 @@ ui <- fluidPage(
                         
                         selectInput("greenonly", "Green Stocks Only?", c("Yes", "No"), "No"),
                         
-                        selectInput("selectionType", "Select unfit industries or select industries?", c("Select industries", "Select unfit industries")),
+                        selectInput("selectionType", "Select unfit industries or select industries?", 
+                                    c("Select industries", "Select unfit industries"), 
+                                    selected = "Select unfit industries"),
                         
                         # These panels will only show based upon selection of "selectionType"
                         conditionalPanel(
@@ -155,7 +140,6 @@ ui <- fluidPage(
                       
                       mainPanel(
                         h3("About the methods:"),
-                        #verbatimTextOutput("length1"),
                         
                         
                         h4("Maximizing Sharpe ratio: Maximizing the return/risk beyond the risk-free-rate"),
@@ -177,7 +161,7 @@ ui <- fluidPage(
                         
                       )),
              
-             
+             # Shinycssloaders is the loading animation
              
              tabPanel("Results", value = "resultspanel",
                       headerPanel("Your optimal portofolio"),
@@ -188,26 +172,11 @@ ui <- fluidPage(
                                    # Portfolio stats
                                    h3("General Stats"),
                                    
-                                   shinycssloaders::withSpinner(tableOutput("stats")), # This needs to be dynamic and show the stats from the chosen method
+                                   shinycssloaders::withSpinner(tableOutput("stats")), 
                                    
                                    h3("Optimal Volume"),
                                    shinycssloaders::withSpinner(dataTableOutput("volstats")),
                                    
-                                   # port stats
-                                   # h3("Vol min stats"),
-                                   # shinycssloaders::withSpinner(tableOutput("vopt_stat")),
-                                   
-                                   # Portfolio stats
-                                   # h3("Sharpe max stats"),
-                                   # shinycssloaders::withSpinner(tableOutput("vsharpe_stat")),
-                                   
-                                   # portfolio stats
-                                   # h3("Stortino max stats"),
-                                   # shinycssloaders::withSpinner(tableOutput("vsortino_stat")),
-                                   
-                                   #sortino
-                                   # h4("Sortino ratio"), 
-                                   # shinycssloaders::withSpinner(dataTableOutput("vsortino")),
                                    
                                    
                           ),
@@ -220,16 +189,6 @@ ui <- fluidPage(
                                    #portfolio returns historgram
                                    h4("Portfolio returns histogram"),
                                    shinycssloaders::withSpinner(plotOutput("vport_hist")),
-                                   
-                                   # Returns histogram
-                                   #h4("Returns Histogram"),
-                                   #shinycssloaders::withSpinner(plotOutput("vreturns_hist")),
-                                   
-                                   
-                                   
-                                   # Efficiency frontier
-                                   #h4("Efficiency Frontier"),
-                                   #shinycssloaders::withSpinner(plotOutput("vefficency_frontier")),
                                    
                                    # Comparison with S&P500
                                    h4("S&P500 Comparison"),
@@ -253,24 +212,11 @@ ui <- fluidPage(
                                    h4("Efficiency Frontier"),
                                    shinycssloaders::withSpinner(plotOutput("vefficency_frontier")),
                                    
-                                   h4("Soon to be added")))
-                        
-                        
-                        # portfolio stats
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
+                                   h4("Soon to be added"))
+                          ) # Tabset panel
                       ) # main panel
              ) # tab panel
-             
-             , position = "fixed-top"), 
-  # navbarPage
+             , position = "fixed-top"), # navbarPage
   
 ) # UI
 
@@ -383,7 +329,8 @@ server <- function(input, output, session) {
     }
   })
   
-  sin.choice.industry <- reactive({            # Fixed
+  # Make a subset if sinstocks is unwanted
+  sin.choice.industry <- reactive({         
     sinstocks <- c("marked as unethical ")
     
     if (isTRUE(input$sinstock == "Yes")){
@@ -395,10 +342,7 @@ server <- function(input, output, session) {
     
   })
   
-  
-  ########### WHERE THE FAULT IS ###########
-  
-  
+  # Use the subset from previous selection to further subset the possible choices if "green only" is selected
   industryChoice <- reactive({
     if (isTRUE(input$greenonly == "Yes")){
         sin.choice.industry()$Industry[sin.choice.industry()$Ethics == " Marked as green stock"]
@@ -410,10 +354,7 @@ server <- function(input, output, session) {
   })
   
   
-  ##################
-  
-  
-  # Update industry choice list
+  # Update industry choice list for both selections
   observe({
     updateSelectInput(session, "industry",
                       choices = industryChoice())
@@ -483,19 +424,20 @@ server <- function(input, output, session) {
     
   })
   
-  # Making the risk_free_rate global
+  # -- Making the risk_free_rate global
   risk_free_rate <<- eventReactive(c(input$update, input$update2), {
     risk_free_rate <- input$rfrate
   }, ignoreNULL = FALSE)
   
-  
+  # -- When update or confirm is clicked -> update the selected tickers list
   tickers1 <- eventReactive(c(input$update, input$update2), {
     input$manual
   }, ignoreNULL = FALSE)
   
   
-  # Go to next page when a confirming button is pressed
+  # -- If input is correct -> Go to next page when a confirming button is pressed
   
+  # -- If input is not valid -> Make the user correct input values before sending the user to the next page
   observeEvent(input$update, {
     
     if (!isTruthy(input$rfrate)){
@@ -517,6 +459,7 @@ server <- function(input, output, session) {
   
   })
   
+  # -- When confirm is clicked - send user to the results page
   observeEvent(input$update2, {
     updateTabsetPanel(session, "tabset1",
                       selected = "resultspanel")
@@ -550,17 +493,17 @@ server <- function(input, output, session) {
   
   
   
-  
+  ############################################
   ########### GENERATING OUTPUTS #############
+  ############################################
+  
   # Generate output for available stocks
   output$vstock_list <-renderDataTable({
     stocks_with_industry # Here we output a subset of vol_input
   })
   
-  
-  
-  
-  # Generate output for stats based upon chosen method
+  # Before generating output for stats based upon chosen method - check that there is input
+  # If there is no input -> display a error message where the user is informed about what the missing input is
   
   output$stats <- renderTable({
     validate(
@@ -741,5 +684,5 @@ server <- function(input, output, session) {
 
 shinyApp(ui = ui, server = server) # Combine it into the app
 
-# Depending on the amount of stocks there can be some loading time (from 20 sec to 3 minutes)
+# Depending on the amount of stocks there can be some loading time (from 10 sec to 3 minutes)
 
