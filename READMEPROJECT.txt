@@ -3,7 +3,7 @@
 
 In this project we create a shiny app where the user has the opportunity to
 determine the optimal stock portfolio form a large set of stocks. The user 
-can choose to exclude sin stocks, or to only include green stocks.
+get the option to exclude sin stocks, and to only include green stocks.
 
 The set of stocks is collected form Yahoo Finance. The lists of sin stocks 
 and green stocks are collected manually from different sources, before they
