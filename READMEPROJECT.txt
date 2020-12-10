@@ -15,6 +15,25 @@ selecting the optimalization, and one to see the results represented in
 graphs and charts. It is important to open Shiny app in full screen for the
 best visual solution. 
 
+To run the scripts you will need an internet connection. In addition, make 
+sure to install all the packages needed. Packages used are:
+- htmlTable
+- shiny
+- tidyquant
+- tidyverse
+- dplyr
+- corrplot
+- nloptr
+- gtools
+- skimr
+- svDialogs
+- TTR
+- markdown
+- shinythemes
+- shinycssloaders
+- RColorBrewer
+- pander
+
 We have chosen to have one master R. file and several sub files for 
 functions and the shiny app script. If all the files are downloaded, the 
 main files will collect the information you need from the sub files. There are
