@@ -394,11 +394,32 @@ server <- function(input, output, session) {
     }
   })
   
+  industryChoice <- reactive({
+    if (isTRUE(input$greenonly == "Yes")){
+        
+        sin.choice()$Industry[sin.choice()$Ethics == " Marked as green stock" & sin.choice()$Industry %notin% input$industry]
+    }
+    else{
+        sin.choice()$Industry[sin.choice()$Industry %notin% input$industrySelect]
+      }
+  })
+  
   
   
   #  choice1 <-  reactive({
   #    stocks_with_industry$Symbol[stocks_with_industry$Industry %notin% input$industry]
   #  })
+  
+  # Update industry choice list
+  observe({
+    updateSelectInput(session, "industry",
+                      choices = industryChoice())
+  })
+  
+  observe({
+    updateSelectInput(session, "industrySelect",
+                      choices = industryChoice())
+  })
   
   
   observe({  # Update the choice list - currently only work when the user select one industry. It does not filter out if the user select more than one industry (needs to be fixed)
