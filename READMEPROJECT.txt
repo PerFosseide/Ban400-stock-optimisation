@@ -1,19 +1,32 @@
-  
 ########## README PROJECT ##########
 
-In this project we create a shiny app where the user has the opportunity to
-determine the optimal stock portfolio form a large set of stocks. The user 
-get the option to exclude sin stocks, and to only include green stocks.
+ABOUT
+
+This is the readme file for our project in BAN400
+
+The project idea is to create a shiny app where a user can determine the optimal stock portofolio from a larger set of stocks.
+
+Our project is doing the following:
+
+#1. Download stock data from Yahoo Finance
+#2. Create graph on stock development
+#3. Create correlation plot
+#4. Optimization (solver):
+-Find portfolio with max sharp ratio
+-Find portfolio with minimum variance
+#5. Draw efficiency frontier & test portfolios against solver result
+#6. Test best portfolio against S&P 500 return in same period
+#7. Classify stocks (by industry, sin stocks or green stocks)
+#8. Make a Shiny app where
+  - the user can give predetermined input
+  - the user get output on which portofolio is the optimal one based upon the chosen optimization method
+  - the user is getting error messages and warnings when something that can affect the validity of the output is happening.
+
 
 The set of stocks is collected form Yahoo Finance. The lists of sin stocks 
 and green stocks are collected manually from different sources, before they
 are loaded into R as data frames. These data frames can be used for including
-or decluding certain shares in the shiny app. 
-
-The Shiny app has three different tabs. One for selecting stocks, one for 
-selecting the optimalization, and one to see the results represented in 
-graphs and charts. It is important to open Shiny app in full screen for the
-best visual solution. 
+or decluding certain shares in the shiny app.
 
 To run the scripts you will need an internet connection. In addition, make 
 sure to install all the packages needed. Packages used are:
@@ -32,7 +45,12 @@ sure to install all the packages needed. Packages used are:
 - shinythemes
 - shinycssloaders
 - RColorBrewer
-- pander
+- pander 
+
+The Shiny app has three different tabs. One for selecting stocks, one for 
+selecting the optimalization, and one to see the results represented in 
+graphs and charts. It is important to open Shiny app in full screen for the
+best visual solution. 
 
 We have chosen to have one master R. file and several sub files for 
 functions and the shiny app script. If all the files are downloaded, the 
