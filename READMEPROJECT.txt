@@ -2,22 +2,44 @@
 ########## README PROJECT ##########
 
 In this project we create a shiny app where the user has the opportunity to
-determine the optimal stock portfolio from a large set of stocks. The user 
-can choose to exclude sin stocks, or to only include green stocks.
+ose to exclude sin stocks, or to only include green stocks.
+
+determine the optimal stock portfolio form a large set of stocks. The user 
+get the option to exclude sin stocks, and to only include green stocks.
 
 The set of stocks is collected form Yahoo Finance. The lists of sin stocks 
 and green stocks are collected manually from different sources, before they
 are loaded into R as data frames. These data frames can be used for including
 or decluding certain shares in the shiny app. 
 
-The shiny app has three different tabs. One for selecting stocks, one for 
+The Shiny app has three different tabs. One for selecting stocks, one for 
 selecting the optimalization, and one to see the results represented in 
-graphs and charts.
+graphs and charts. It is important to open Shiny app in full screen for the
+best visual solution. 
 
-In the project, we have chosen to have one master R. file and several sub 
-files for functions and the shiny app script. If all the files are downloaded,
-the main files will collect the information you need from the sub files. There 
-are two important main files. One for the the solution and results in R Markdown, 
+To run the scripts you will need an internet connection. In addition, make 
+sure to install all the packages needed. Packages used are:
+- htmlTable
+- shiny
+- tidyquant
+- tidyverse
+- dplyr
+- corrplot
+- nloptr
+- gtools
+- skimr
+- svDialogs
+- TTR
+- markdown
+- shinythemes
+- shinycssloaders
+- RColorBrewer
+- pander
+
+We have chosen to have one master R. file and several sub files for 
+functions and the shiny app script. If all the files are downloaded, the 
+main files will collect the information you need from the sub files. There are
+two important main files. One for the the solution and results in R Markdown, 
 and one for the Shiny app.
 
 Explanation of the different files:
