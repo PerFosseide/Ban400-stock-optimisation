@@ -321,14 +321,6 @@ server <- function(input, output, session) {
     }
   })
   
-  #  observe({
-  #    if (!isTruthy(input$manual)){
-  #      showNotification(id = "noStocks", "Please select stocks", type = "default")
-  #    }
-  #    else{
-  #      NULL
-  #    }
-  #  })
   
   # Warning 2 - No from or to date
   observe({
@@ -348,9 +340,6 @@ server <- function(input, output, session) {
       NULL
     }
   })
-  
-  
-  
   
   
   
@@ -394,21 +383,35 @@ server <- function(input, output, session) {
     }
   })
   
-  industryChoice <- reactive({
-    if (isTRUE(input$greenonly == "Yes")){
-        
-        sin.choice()$Industry[sin.choice()$Ethics == " Marked as green stock" & sin.choice()$Industry %notin% input$industry]
+  sin.choice.industry <- reactive({            # Fixed
+    sinstocks <- c("marked as unethical ")
+    
+    if (isTRUE(input$sinstock == "Yes")){
+      return(stocks_with_industry[stocks_with_industry$Ethics %notin% sinstocks,])
     }
     else{
-        sin.choice()$Industry[sin.choice()$Industry %notin% input$industrySelect]
+        return(stocks_with_industry)
       }
+    
   })
   
   
+  ########### WHERE THE FAULT IS ###########
   
-  #  choice1 <-  reactive({
-  #    stocks_with_industry$Symbol[stocks_with_industry$Industry %notin% input$industry]
-  #  })
+  
+  industryChoice <- reactive({
+    if (isTRUE(input$greenonly == "Yes")){
+        sin.choice.industry()$Industry[sin.choice.industry()$Ethics == " Marked as green stock"]
+      }
+    else{
+        sin.choice.industry()$Industry
+      }
+    
+  })
+  
+  
+  ##################
+  
   
   # Update industry choice list
   observe({
