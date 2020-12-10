@@ -12,6 +12,7 @@ library(markdown)
 library(shinythemes)
 library(shinycssloaders)
 library(RColorBrewer)
+library(stringr)
 
 
 
@@ -45,6 +46,9 @@ source("Ban400-Functions-old.R")
 from_date <- "2018-08-01"
 to_date <- "2020-08-01"
 
+# Setting a default max value for stock selection
+max_stockselection <- 100
+
 
 ui <- fluidPage(
   tags$main(tags$style(css)),
@@ -69,7 +73,7 @@ ui <- fluidPage(
                         
                         numericInput("n_unique_stocks", "Amount of stocks to select a portfolio from: ", 10,
                                      min = 1, 
-                                     max = 100,
+                                     max = max_stockselection,
                                      step = 1),
                         
                         selectInput("sinstock", "Avoid sinstocks?", c("Yes", "No"), "Yes"),
@@ -114,12 +118,12 @@ ui <- fluidPage(
                       headerPanel("Choose optimalizations and constraints"),
                       sidebarPanel(
                         selectInput("shorting", "Allow for shorting?",
-                                    c("Yes", "No"), selected = "Yes"),
+                                    c("Yes", "No"), selected = "No"),
                         selectInput("method", "Optimalization method:",
                                     c("Sharpe Ratio Maximizing", 
                                       "Volatility Minimizing", 
                                       "Sortino Ratio Maximizing"),
-                                    selected = "Sharpe Ratio Maximizing"),
+                                    selected = "Sortino Ratio Maximizing"),
                         
                         numericInput("stockmax", "Max ratio of a stock in the portfolio:", 
                                      value = 1,
@@ -278,6 +282,66 @@ server <- function(input, output, session) {
   
   `%notin%` <- Negate(`%in%`) # Making an opposite of %in%
   
+  
+  # Warning 1 - If number of unique stocks is beyond 50 a warning notification about loading time will show
+  observe({
+    
+    if (!isTruthy(input$n_unique_stocks)){
+      showNotification(id = "noinput1", "Please select a number of stocks", type = "error")
+    }
+    else if (input$n_unique_stocks > 50 & input$n_unique_stocks <= max_stockselection){
+      showNotification(id = "above50", "You have selected more than 50 stocks, expect 1 minute of loading time", type = "warning")
+    }
+    else if(input$n_unique_stocks > max_stockselection){
+      showNotification(id = "above100", "Please select less than 100 stocks", type = "error")
+    }
+  
+    else{
+      NULL
+    }
+  })
+  
+  observe({
+    if (!isTruthy(input$rfrate)){
+      showNotification(id = "noRfRate", "Please specify risk free rate", type = "error")
+    }
+    else{
+      NULL
+    }
+  })
+  
+#  observe({
+#    if (!isTruthy(input$manual)){
+#      showNotification(id = "noStocks", "Please select stocks", type = "default")
+#    }
+#    else{
+#      NULL
+#    }
+#  })
+  
+  # Warning 2 - No from or to date
+  observe({
+    if (!isTruthy(input$fromdate)){
+      showNotification(id = "NoFromDate", "Please specify which date you want the portfolio optimization to start from", type = "error")
+    }
+    else{
+      NULL
+    }
+  })
+  
+  observe({
+    if (!isTruthy(input$todate)){
+      showNotification(id = "NoToDate", "Please specify which date you want the portfolio optimization to start from", type = "error")
+    }
+    else{
+      NULL
+    }
+  })
+  
+  
+ 
+  
+  
 
   # If sinstocks are unwanted -> make a subset of the dataframe without sinstocks
   sin.choice <- reactive({
@@ -316,6 +380,7 @@ server <- function(input, output, session) {
   })
   
   observeEvent(input$random, {  # Get random portfolio which does not include chosen undesired industry - the user can select the amount of stocks in the random portfolio
+    
     updateSelectInput(session, "manual",
                       selected = sample(choice1(), input$n_unique_stocks))
   })
@@ -413,7 +478,7 @@ server <- function(input, output, session) {
   
   
   ########### GENERATING OUTPUTS #############
-  # Generate output for optimal volume
+  # Generate output for available stocks
   output$vstock_list <-renderDataTable({
     stocks_with_industry # Here we output a subset of vol_input
   })
@@ -424,6 +489,12 @@ server <- function(input, output, session) {
   # Generate output for stats based upon chosen method
   
   output$stats <- renderTable({
+    validate(
+      need(isTruthy(input$rfrate), "Please input risk free rate at the stock selection page"),
+      need(isTruthy(input$manual), "Please input stocks at the stock selection page"),
+      need(isTruthy(input$fromdate), "Please input a valid date at the stock selection page"),
+      need(isTruthy(input$todate), "Please input a valid date at the stock selection page")
+    )
     x <- input$method
     if (x == "Sharpe Ratio Maximizing"){
       sharpe_output()[[4]]
@@ -439,6 +510,12 @@ server <- function(input, output, session) {
   # Generate output for optimal volume based upon chosen method
   
   output$volstats <- renderDataTable({
+    validate(
+      need(isTruthy(input$rfrate), "Please input risk free rate at the stock selection page"),
+      need(isTruthy(input$manual), "Please input stocks at the stock selection page"),
+      need(isTruthy(input$fromdate), "Please input a valid date at the stock selection page"),
+      need(isTruthy(input$todate), "Please input a valid date at the stock selection page")
+    )
     x <- input$method
     if (x == "Sharpe Ratio Maximizing"){
       sharpe_output()[[3]]
@@ -454,6 +531,12 @@ server <- function(input, output, session) {
   
   # Generate output for portfolio industry percentages
   output$vpiechart <- renderPlot({
+    validate(
+      need(isTruthy(input$rfrate), "Please input risk free rate at the stock selection page"),
+      need(isTruthy(input$manual), "Please input stocks at the stock selection page"),
+      need(isTruthy(input$fromdate), "Please input a valid date at the stock selection page"),
+      need(isTruthy(input$todate), "Please input a valid date at the stock selection page")
+    )
     x <- input$method
     if (x == "Sharpe Ratio Maximizing"){
       portfolio_industry(dataInput()[[1]], (sharpe_output()[[2]]))
@@ -470,6 +553,13 @@ server <- function(input, output, session) {
   
   # Generate output for the correlation plot
   output$vcorr_plot <- renderPlot({
+    validate(
+      need(isTruthy(input$rfrate), "Please input risk free rate at the stock selection page"),
+      need(isTruthy(input$manual), "Please input stocks at the stock selection page"),
+      need(isTruthy(input$fromdate), "Please input a valid date at the stock selection page"),
+      need(isTruthy(input$todate), "Please input a valid date at the stock selection page")
+    )
+    
   x <- input$method
   if (x == "Sharpe Ratio Maximizing"){
     correlation_plot(sharpe_output()[[3]], input$fromdate, input$todate)
@@ -488,6 +578,12 @@ server <- function(input, output, session) {
   
   # Generate output for the returns histogram
   output$vreturns_hist <- renderPlot({
+    validate(
+      need(isTruthy(input$rfrate), "Please input risk free rate at the stock selection page"),
+      need(isTruthy(input$manual), "Please input stocks at the stock selection page"),
+      need(isTruthy(input$fromdate), "Please input a valid date at the stock selection page"),
+      need(isTruthy(input$todate), "Please input a valid date at the stock selection page")
+    )
       x <- input$method
       if (x == "Sharpe Ratio Maximizing"){
         returns_hist(dataInput()[[5]], sharpe_output()[[3]])
@@ -504,6 +600,12 @@ server <- function(input, output, session) {
   
   # Genereate output for the stock price history
   output$vstock_price_history <- renderPlot({
+    validate(
+      need(isTruthy(input$rfrate), "Please input risk free rate at the stock selection page"),
+      need(isTruthy(input$manual), "Please input stocks at the stock selection page"),
+      need(isTruthy(input$fromdate), "Please input a valid date at the stock selection page"),
+      need(isTruthy(input$todate), "Please input a valid date at the stock selection page")
+    )
     x <- input$method
     if (x == "Sharpe Ratio Maximizing"){
       stock_price_history(dataInput()[[2]],sharpe_output()[[3]],input$fromdate, input$todate)
@@ -519,11 +621,23 @@ server <- function(input, output, session) {
   
   # Generate output for the efficiency frontier
   output$vefficency_frontier <- renderPlot({
+    validate(
+      need(isTruthy(input$rfrate), "Please input risk free rate at the stock selection page"),
+      need(isTruthy(input$manual), "Please input stocks at the stock selection page"),
+      need(isTruthy(input$fromdate), "Please input a valid date at the stock selection page"),
+      need(isTruthy(input$todate), "Please input a valid date at the stock selection page")
+    )
     efficency_frontier(dataInput()[[1]], dataInput()[[7]], dataInput()[[3]], dataInput()[[6]], n = 5000)
   })
   
   # Generate output for the S&P500 comparison
   output$vcompare_SP500 <- renderPlot({
+    validate(
+      need(isTruthy(input$rfrate), "Please input risk free rate at the stock selection page"),
+      need(isTruthy(input$manual), "Please input stocks at the stock selection page"),
+      need(isTruthy(input$fromdate), "Please input a valid date at the stock selection page"),
+      need(isTruthy(input$todate), "Please input a valid date at the stock selection page")
+    )
     x <- input$method
     if (x == "Sharpe Ratio Maximizing"){
       compare_SP500(as.matrix(sharpe_output()[[2]]), dataInput()[[1]], input$fromdate, input$todate)
@@ -539,6 +653,12 @@ server <- function(input, output, session) {
   
   # Generate output for the portfolio returns histogram
   output$vport_hist <- renderPlot({
+    validate(
+      need(isTruthy(input$rfrate), "Please input risk free rate at the stock selection page"),
+      need(isTruthy(input$manual), "Please input stocks at the stock selection page"),
+      need(isTruthy(input$fromdate), "Please input a valid date at the stock selection page"),
+      need(isTruthy(input$todate), "Please input a valid date at the stock selection page")
+    )
     returns_final_hist(dataInput()[[3]],as.matrix(sharpe_output()[[2]]))
   })
   
