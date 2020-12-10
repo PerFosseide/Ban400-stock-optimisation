@@ -155,6 +155,7 @@ ui <- fluidPage(
                       
                       mainPanel(
                         h3("About the methods:"),
+                        #verbatimTextOutput("length1"),
                         
                         
                         h4("Maximizing Sharpe ratio: Maximizing the return/risk beyond the risk-free-rate"),
@@ -406,10 +407,16 @@ server <- function(input, output, session) {
     
   })
   
+  
   observeEvent(input$random, {  # Get random portfolio which does not include chosen undesired industry - the user can select the amount of stocks in the random portfolio
+    if (isTRUE(input$n_unique_stocks <= length(choice1()))){
+      updateSelectInput(session, "manual",
+                        selected = sample(choice1(), input$n_unique_stocks))
+    }
+    else{
+      showNotification(id = "randomWarning", "Not enough stocks aviable, select less stocks or select more industries", type = "error")
+    }
     
-    updateSelectInput(session, "manual",
-                      selected = sample(choice1(), input$n_unique_stocks))
   })
   
   
