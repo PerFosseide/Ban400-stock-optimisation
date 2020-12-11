@@ -51,7 +51,7 @@ options(spinner.color="#000000")
 
 # Setting a default date
 from_date <- "2017-05-01"
-to_date <- "2020-08-31"
+to_date <- "2020-07-31"
 
 # Setting dynamic default max dates
 max_to_date <- Sys.Date()
