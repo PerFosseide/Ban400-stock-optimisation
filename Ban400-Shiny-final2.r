@@ -27,7 +27,6 @@ css2 <- HTML(" nav {
 }")
 
 
-
 # setting a global loading icon color
 options(spinner.color="#000000")
 
@@ -35,16 +34,11 @@ source("Ban400-Functions-old.R")
 
 
 # Setting a default date
-from_date <- "2017-05-01"
-to_date <- "2020-08-31"
-
-# Setting a dynamic default max date
-max_to_date <- Sys.Date()
-max_from_date <- as.Date(max_to_date) - 7 # Ensuring that max from date never is less than 7 days before the to date
-
+from_date <- "2018-08-01"
+to_date <- "2020-07-31"
 
 # Setting a default max value for stock selection
-max_stockselection <- 1000
+max_stockselection <- 100
 
 
 ui <- fluidPage(
@@ -96,14 +90,14 @@ ui <- fluidPage(
                         
                         dateInput("fromdate", "Test-data from: ", 
                                   from_date,
-                                  min = "2000-01-01",
-                                  max = max_from_date, # We need minimum 1 week of data to give sensible answers
+                                  min = "2007-08-01",
+                                  max = "2020-10-01",
                                   format = "yyyy/mm/dd"
                         ),
                         dateInput("todate", "Test-data to: ",
                                   to_date,
-                                  min = "2000-01-02",
-                                  max = max_to_date,
+                                  min = "2007-08-02",
+                                  max = "2020-10-01",
                                   format = "yyyy/mm/dd"
                         ),
                         actionButton("update", "Confirm Selection")),
@@ -124,7 +118,7 @@ ui <- fluidPage(
                                     c("Sharpe Ratio Maximizing", 
                                       "Volatility Minimizing", 
                                       "Sortino Ratio Maximizing"),
-                                    selected = "Sharpe Ratio Maximizing"),
+                                    selected = "Sortino Ratio Maximizing"),
                         
                         numericInput("stockmax", "Max ratio of a stock in the portfolio:", 
                                      value = 1,
@@ -184,9 +178,6 @@ ui <- fluidPage(
                                    shinycssloaders::withSpinner(dataTableOutput("volstats")),
                                    
                                    
-                                   # Portfolio stats
-                                   # h3("Sharpe max stats"),
-                                   # shinycssloaders::withSpinner(tableOutput("vsharpe_stat")),
                                    
                           ),
                           tabPanel("Charts",
@@ -221,8 +212,8 @@ ui <- fluidPage(
                                    h4("Efficiency Frontier"),
                                    shinycssloaders::withSpinner(plotOutput("vefficency_frontier")),
                                    
-                                   ) # Tabpanel
-                          ) # Tabset panel
+                                   h4("Soon to be added"))
+                        ) # Tabset panel
                       ) # main panel
              ) # tab panel
              , position = "fixed-top"), # navbarPage
@@ -317,8 +308,8 @@ server <- function(input, output, session) {
       return(stocks_with_industry[stocks_with_industry$Ethics %notin% sinstocks,])
     }
     else{
-        return(stocks_with_industry)
-      }
+      return(stocks_with_industry)
+    }
   })
   
   # Incorporate the sinstock subset with the green.stock only choice 
@@ -351,19 +342,19 @@ server <- function(input, output, session) {
       return(stocks_with_industry[stocks_with_industry$Ethics %notin% sinstocks,])
     }
     else{
-        return(stocks_with_industry)
-      }
+      return(stocks_with_industry)
+    }
     
   })
   
   # Use the subset from previous selection to further subset the possible choices if "green only" is selected
   industryChoice <- reactive({
     if (isTRUE(input$greenonly == "Yes")){
-        sin.choice.industry()$Industry[sin.choice.industry()$Ethics == " Marked as green stock"]
-      }
+      sin.choice.industry()$Industry[sin.choice.industry()$Ethics == " Marked as green stock"]
+    }
     else{
-        sin.choice.industry()$Industry
-      }
+      sin.choice.industry()$Industry
+    }
     
   })
   
@@ -404,8 +395,8 @@ server <- function(input, output, session) {
       showNotification("Please insert a number in max stock ratio", type = "error")
     }
     else if (isTRUE(input$stockmax > 1)){
-    showNotification("Please insert a max stock ratio equal or lower than 1", type = "error")
-  
+      showNotification("Please insert a max stock ratio equal or lower than 1", type = "error")
+      
     }
     else{
       NULL
@@ -464,12 +455,12 @@ server <- function(input, output, session) {
     
   })
   
-  # Making the risk_free_rate global
+  # -- Making the risk_free_rate global
   risk_free_rate <<- eventReactive(c(input$update, input$update2), {
     risk_free_rate <- input$rfrate
   }, ignoreNULL = FALSE)
   
-  
+  # -- When update or confirm is clicked -> update the selected tickers list
   tickers1 <- eventReactive(c(input$update, input$update2), {
     input$manual
   }, ignoreNULL = FALSE)
@@ -512,7 +503,7 @@ server <- function(input, output, session) {
       updateTabsetPanel(session, "tabset1", 
                         selected = "methodpanel")
     }
-  
+    
   })
   
   # -- If input is correct -> Go to next page when a confirming button is pressed
@@ -540,7 +531,7 @@ server <- function(input, output, session) {
                         selected = "resultspanel")
     }
     
-   
+    
   })
   
   
@@ -581,8 +572,10 @@ server <- function(input, output, session) {
   
   
   
-  
+  ############################################
   ########### GENERATING OUTPUTS #############
+  ############################################
+  
   # Generate output for available stocks
   output$vstock_list <-renderDataTable({
     stocks_with_industry # Here we output a subset of vol_input
@@ -735,21 +728,27 @@ server <- function(input, output, session) {
     
   })
   
-  
   # Generate output for the efficiency frontier
-  output$vefficency_frontier <- renderPlot({
-    nstocks <- length(input$manual)
+  output$vefficency_frontier <- renderPlot ({
     validate(
       need(isTruthy(input$rfrate), "Please input risk free rate at the stock selection page"),
       need(isTruthy(input$manual), "Please input stocks at the stock selection page"),
-      need(nstocks >= 2, "Please select more stocks"),
-      need(isTruthy(input$fromdate), "Please input a valid date at the stock selection page"),
+      need(isTruthy(input$fromdate), "Please input a valid date at the stock selection page"),  
       need(isTruthy(input$todate), "Please input a valid date at the stock selection page")
     )
-    efficency_frontier(dataInput()[[1]], dataInput()[[7]], dataInput()[[3]], dataInput()[[6]], n = 5000)
+    
+    x <- input$method
+    if (x == "Sharpe Ratio Maximizing"){
+      efficency_frontier(sharpe_output()[[3]], dataInput()[[7]], dataInput()[[3]], dataInput()[[6]], n = 5000)  
+    }
+    else if (x == "Sortino Ratio Maximizing"){
+      efficency_frontier(sortino_output()[[3]], dataInput()[[7]], dataInput()[[3]], dataInput()[[6]], n = 5000)  
+    }
+    else{
+      efficency_frontier(vol_output()[[3]], dataInput()[[7]], dataInput()[[3]], dataInput()[[6]], n = 5000)  
+    }
+    
   })
-  
-
   
   # Generate output for the S&P500 comparison
   output$vcompare_SP500 <- renderPlot({

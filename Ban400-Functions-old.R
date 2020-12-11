@@ -267,9 +267,14 @@ min_vol_ef <- function(weigths,stock_returns, stock_cov) {
 }
 
 #drwas the effeciencyfrontier  
-efficency_frontier <- function(tickers, weigths, returns_matrix, stock_cov, n = 10000) {
+efficency_frontier <- function(chosen_stocks, weigths, returns_matrix, stock_cov, n = 10000) {
+  tickers <- chosen_stocks$Symbol
   
-  aplha <- rep(0.45,length(weigths))
+  stock_cov <- stock_cov[tickers,tickers]
+  
+  returns_matrix <- returns_matrix[, tickers]
+  
+  aplha <- rep(0.45,length(tickers))
   values = rdirichlet(n,aplha)
   values <- as.data.frame(values)
   
