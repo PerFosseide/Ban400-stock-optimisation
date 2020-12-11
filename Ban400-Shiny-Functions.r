@@ -308,7 +308,39 @@ efficency_frontier <- function(chosen_stocks, weigths, returns_matrix, stock_cov
       labs(color = "Sharpe ratio")
   }
   
- 
+  stock_cov <- stock_cov[tickers,tickers]
+  
+  returns_matrix <- returns_matrix[, tickers]
+  
+  aplha <- rep(0.45,length(tickers))
+  values = rdirichlet(n,aplha)
+  values <- as.data.frame(values)
+  
+  values <- values %>%
+    mutate(avg_return = apply(., 1, mean_return, returns = returns_matrix),
+           std = apply(., 1, min_vol_ef, stock_returns = returns_matrix, stock_cov =  stock_cov),
+           sharpe = (-(apply(., 1,neg_sharpe_ef, stock_returns= returns_matrix, stock_cov =  stock_cov))))
+  
+  values_names <- append(tickers,c("Avg_return", "Yearly_std","Sharpe_ratio"))
+  colnames(values) <- values_names
+  
+  
+  plot <- values %>%
+    ggplot(aes(x=Yearly_std,y=Avg_return, color = Sharpe_ratio))+
+    geom_point()+
+    scale_y_continuous(labels = scales::percent) +
+    theme_classic() +
+    scale_x_continuous() +
+    labs(title = "Efficency frontier",
+         subtitle = paste(tickers, collapse = ", ")) +
+    xlab("Portfolio standard deviation") +
+    ylab("Portfolio expected return") +
+    theme(text = element_text(size=15))
+  
+  plot <- plot + scale_color_gradient(low="blue",
+                                      high ="red") +
+    theme(text= element_text(size = 14))+
+    labs(color = "Sharpe ratio")
   
   return(plot)
 }
@@ -577,6 +609,7 @@ stock_opt_sharpe <- function(tickers, weigths ,returns,cov_matrix,  upper_bounds
     filter(abs(V1)>0.001) %>% 
     mutate(Symbol = row.names(.)) %>%  
     left_join(stock_info, by=c("Symbol"="Symbol")) %>% 
+    mutate(V1 = paste((V1*100), "%")) %>% 
     rename("Percentage" = "V1") %>% 
     select(Percentage, Name, Symbol)
   
@@ -622,6 +655,7 @@ stock_opt_vol <- function(tickers, weigths ,returns,cov_matrix,  upper_bounds = 
     filter(abs(V1)>0.001) %>% 
     mutate(Symbol = row.names(.)) %>%  
     left_join(stock_info, by=c("Symbol"="Symbol")) %>% 
+    mutate(V1 = paste((V1*100), "%")) %>% 
     rename("Percentage" = "V1") %>% 
     select(Percentage, Name, Symbol)
   
@@ -691,6 +725,7 @@ stock_opt_sortino <- function(tickers, weigths,stock_return, cov_matrix,  upper_
     filter(abs(V1)>0.001) %>% 
     mutate(Symbol = row.names(.)) %>%  
     left_join(stock_info, by=c("Symbol"="Symbol")) %>% 
+    mutate(V1 = paste((V1*100), "%")) %>% 
     rename("Percentage" = "V1") %>% 
     select(Percentage, Name, Symbol)
   
