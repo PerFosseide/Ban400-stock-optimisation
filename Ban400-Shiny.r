@@ -304,8 +304,8 @@ server <- function(input, output, session) {
       showNotification(id = "noinput1", "Please select a number of stocks", type = "error") # Show a notification with theme "error"
     }
     
-    else if (input$n_unique_stocks > 50 & input$n_unique_stocks <= max_stockselection){ # Else if n_unique_stocks is above 50 and under max allowed number:
-      showNotification(id = "above50", "You have selected more than 50 stocks, expect 1 minute of loading time", type = "warning") # Show notification
+    else if (input$n_unique_stocks > 500 & input$n_unique_stocks <= max_stockselection){ # Else if n_unique_stocks is above 50 and under max allowed number:
+      showNotification(id = "above50", "You have selected a lot of stocks, expect longer loading time", type = "warning") # Show notification
     }
     else if(input$n_unique_stocks > max_stockselection){ # If number of number of stocks selected is above allowed number of stocks
       showNotification(id = "above100", "Please select less than 1000 stocks", type = "error") # Show notification
