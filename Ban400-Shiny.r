@@ -23,7 +23,7 @@ library(stringr)
 
 # -- Load stock optimizing functions
 
-source("Ban400-Functions-old.R")
+source("Ban400-Shiny-Functions.R")
 
 # -- End of loading -- #
 
