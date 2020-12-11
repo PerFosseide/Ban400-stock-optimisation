@@ -10,7 +10,7 @@
 ##############################################################################################################
 load("df1.Rdata")
 load("stock_info.Rdata")
-load("stocks_industry.Rdata")
+
 
 
 
@@ -270,38 +270,45 @@ min_vol_ef <- function(weigths,stock_returns, stock_cov) {
 efficency_frontier <- function(chosen_stocks, weigths, returns_matrix, stock_cov, n = 10000) {
   tickers <- chosen_stocks$Symbol
   
-  stock_cov <- stock_cov[tickers,tickers]
+  if(length(tickers)==1) {
+    plot <- ""
+  } else {
+    stock_cov <- stock_cov[tickers,tickers]
+    
+    returns_matrix <- returns_matrix[, tickers]
+    
+    aplha <- rep(0.45,length(tickers))
+    values = rdirichlet(n,aplha)
+    values <- as.data.frame(values)
+    
+    values <- values %>%
+      mutate(avg_return = apply(., 1, mean_return, returns = returns_matrix),
+             std = apply(., 1, min_vol_ef, stock_returns = returns_matrix, stock_cov =  stock_cov),
+             sharpe = (-(apply(., 1,neg_sharpe_ef, stock_returns= returns_matrix, stock_cov =  stock_cov))))
+    
+    values_names <- append(tickers,c("Avg_return", "Yearly_std","Sharpe_ratio"))
+    colnames(values) <- values_names
+    
+    
+    plot <- values %>%
+      ggplot(aes(x=Yearly_std,y=Avg_return, color = Sharpe_ratio))+
+      geom_point()+
+      scale_y_continuous(labels = scales::percent) +
+      theme_classic() +
+      scale_x_continuous() +
+      labs(title = "Efficency frontier",
+           subtitle = paste(tickers, collapse = ", ")) +
+      xlab("Portfolio standard deviation") +
+      ylab("Portfolio expected return") +
+      theme(text = element_text(size=15))
+    
+    plot <- plot + scale_color_gradient(low="blue",
+                                        high ="red") +
+      theme(text= element_text(size = 14))+
+      labs(color = "Sharpe ratio")
+  }
   
-  returns_matrix <- returns_matrix[, tickers]
-  
-  aplha <- rep(0.45,length(tickers))
-  values = rdirichlet(n,aplha)
-  values <- as.data.frame(values)
-  
-  values <- values %>%
-    mutate(avg_return = apply(., 1, mean_return, returns = returns_matrix),
-           std = apply(., 1, min_vol_ef, stock_returns = returns_matrix, stock_cov =  stock_cov),
-           sharpe = (-(apply(., 1,neg_sharpe_ef, stock_returns= returns_matrix, stock_cov =  stock_cov))))
-  
-  values_names <- append(tickers,c("Avg_return", "Yearly_std","Sharpe_ratio"))
-  colnames(values) <- values_names
-  
-  plot <- values %>%
-    ggplot(aes(x=Yearly_std,y=Avg_return, color = Sharpe_ratio))+
-    geom_point()+
-    scale_y_continuous(labels = scales::percent) +
-    theme_classic() +
-    scale_x_continuous() +
-    labs(title = "Efficency frontier",
-         subtitle = paste(tickers, collapse = ", ")) +
-    xlab("Portfolio standard deviation") +
-    ylab("Portfolio expected return") +
-    theme(text = element_text(size=15))
-  
-  plot <- plot + scale_color_gradient(low="blue",
-                                      high ="red") +
-    theme(text= element_text(size = 14))+
-    labs(color = "Sharpe ratio")
+ 
   
   return(plot)
 }
@@ -354,7 +361,9 @@ plot_industries <- function(stocks) {
   plot <- industries %>% 
     group_by(Industry) %>%
     mutate(count = n()) %>%
-    distinct(Industry, count) %>%
+    mutate(percent = (count/sum(count))*100) %>% 
+    mutate(percent = if_else(abs(percent)<4,NA)) %>% 
+    distinct(Industry, count, percent) %>%
     mutate(Industry = factor(x = Industry,
                              levels = Industry)) %>% 
     
@@ -364,11 +373,13 @@ plot_industries <- function(stocks) {
     theme_void() +  
     scale_fill_manual(values = mycolors) +
     
-    geom_text(aes(label = paste0(round((count/sum(count))*100), "%")), position = position_stack(vjust = 0.5)) +
+    geom_text(aes(label = paste0(round(percent), "%")), position = position_stack(vjust = 0.5)) +
     theme(text = element_text(size=18))
   
   plot + labs(fill = "Industries")
 }
+
+
 # plot portfolio sector composition
 plot_sectors <- function(stocks) {
   industries <- stocks_with_industry[stocks_with_industry$Symbol %in% stocks,]
@@ -377,7 +388,9 @@ plot_sectors <- function(stocks) {
   plot <- industries %>% 
     group_by(Sector) %>%
     mutate(count = n()) %>%
-    distinct(Sector, count) %>%
+    mutate(percent = (count/sum(count))*100) %>% 
+    mutate(percent = if_else(abs(percent)<4,NA)) %>% 
+    distinct(Sector, count, percent) %>%
     mutate(Sector = factor(x = Sector,
                            levels = Sector)) %>% 
     ggplot(aes(x="", y = count, fill = reorder(Sector, -count))) +
@@ -386,12 +399,13 @@ plot_sectors <- function(stocks) {
     theme_void() +  
     scale_fill_manual(values = mycolors) +
     
-    geom_text(aes(label = paste0(round((count/sum(count))*100), "%")), position = position_stack(vjust = 0.5)) +
+    geom_text(aes(label = paste0(percent, "%")), position = position_stack(vjust = 0.5)) +
     theme(text = element_text(size=15))
   plot + labs(fill = "Sectors")
   
 }
 
+#plot piechart of optimised industry compsisition
 #plot piechart of optimised industry compsisition
 portfolio_industry <- function(stocks, weigths) {
   mycolors <- colorRampPalette(brewer.pal(8, "Set2"))(length(stocks))
@@ -405,8 +419,10 @@ portfolio_industry <- function(stocks, weigths) {
     group_by(Industry) %>%
     mutate(weigths = round(weigths,2)) %>% 
     filter(weigths > 0.005) %>% 
-    summarise(Industry, weigths = sum(weigths)) %>% 
+    summarise(Industry, weigths = sum(weigths)) %>%
     distinct(Industry, weigths) %>% 
+    rowwise() %>% 
+    mutate(labeled = (if_else(abs(weigths)<0.05, "", toString(paste(weigths*100, "%"))))) %>% 
     mutate(Industry = factor(x = Industry,
                              levels = Industry)) %>% 
     ggplot(aes(x="", y = weigths, fill = reorder(Industry, -weigths))) +
@@ -415,7 +431,7 @@ portfolio_industry <- function(stocks, weigths) {
     theme_void() +  
     scale_fill_manual(values = mycolors) +
     
-    geom_text(aes(label = paste0((weigths*100), "%")), position = position_stack(vjust = 0.5)) +
+    geom_text(aes(label = paste0(labeled)), position = position_stack(vjust = 0.5)) +
     theme(text = element_text(size=15))  
   plot + labs(fill = "Industries")
   
@@ -663,7 +679,7 @@ stock_opt_sortino <- function(tickers, weigths,stock_return, cov_matrix,  upper_
   con <- function(weigths){
     port <-weigths
     return(sum(port)-port_size) }
-  nl.opts(list(xtol_rel = 0,ftol_abs = 0.0, maxeval = 10000))
+  nl.opts(list(xtol_rel = 0,ftol_abs = 0.0, maxeval = 1000))
   
   sortino_opt <- slsqp(weigths, fn = sortino(stock_return, weigths), lower = lower_bounds,
                        upper = bounds, heq = con)

@@ -12,7 +12,6 @@ library(markdown)
 library(shinythemes)
 library(shinycssloaders)
 library(RColorBrewer)
-library(stringr)
 
 
 
