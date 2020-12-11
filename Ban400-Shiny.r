@@ -218,7 +218,7 @@ ui <- fluidPage(
                                    shinycssloaders::withSpinner(tableOutput("stats")), # Show statistics about the optimal portfolio
                                    
                                    # Optimal portfolio stock volumes
-                                   h3("Optimal Volume"),
+                                   h3("Optimal Volume, only shows positions that are larger than 0.1 %"),
                                    shinycssloaders::withSpinner(dataTableOutput("volstats")), # Show optimal volume output
                                    
                                    
