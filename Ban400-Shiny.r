@@ -34,11 +34,16 @@ source("Ban400-Functions-old.R")
 
 
 # Setting a default date
-from_date <- "2018-08-01"
-to_date <- "2020-08-01"
+from_date <- "2017-05-01"
+to_date <- "2020-08-31"
+
+# Setting a dynamic default max date
+max_to_date <- Sys.Date()
+max_from_date <- as.Date(max_to_date) - 7 # Ensuring that max from date never is less than 7 days before the to date
+
 
 # Setting a default max value for stock selection
-max_stockselection <- 100
+max_stockselection <- 1000
 
 
 ui <- fluidPage(
@@ -90,14 +95,14 @@ ui <- fluidPage(
                         
                         dateInput("fromdate", "Test-data from: ", 
                                   from_date,
-                                  min = "2007-08-01",
-                                  max = "2020-10-01",
+                                  min = "2000-01-01",
+                                  max = max_from_date, # We need minimum 1 week of data to give sensible answers
                                   format = "yyyy/mm/dd"
                         ),
                         dateInput("todate", "Test-data to: ",
                                   to_date,
-                                  min = "2007-08-02",
-                                  max = "2020-10-01",
+                                  min = "2000-01-02",
+                                  max = max_to_date,
                                   format = "yyyy/mm/dd"
                         ),
                         actionButton("update", "Confirm Selection")),
@@ -118,7 +123,7 @@ ui <- fluidPage(
                                     c("Sharpe Ratio Maximizing", 
                                       "Volatility Minimizing", 
                                       "Sortino Ratio Maximizing"),
-                                    selected = "Sortino Ratio Maximizing"),
+                                    selected = "Sharpe Ratio Maximizing"),
                         
                         numericInput("stockmax", "Max ratio of a stock in the portfolio:", 
                                      value = 1,
@@ -212,7 +217,7 @@ ui <- fluidPage(
                                    h4("Efficiency Frontier"),
                                    shinycssloaders::withSpinner(plotOutput("vefficency_frontier")),
                                    
-                                   h4("Soon to be added"))
+                                   ) # Tabpanel
                           ) # Tabset panel
                       ) # main panel
              ) # tab panel
