@@ -15,16 +15,20 @@ Our project is doing the following:
 #4. Optimization (solver):
 -Find portfolio with max sharp ratio
 -Find portfolio with minimum variance
+-Find portfolio with max sortino ratio
 #5. Draw efficiency frontier & test portfolios against solver result
 #6. Test best portfolio against S&P 500 return in same period
 #7. Classify stocks (by industry, sin stocks or green stocks)
-#8. Make a Shiny app where
-  - the user can give predetermined input
+#8. Everything is embedded in a shiny app where
+  - the user can give predetermined input   
+  - the user can sort out sin stocks
+  - the user can easily generate a portofolio only consisting of green stocks 
+  - the user can decide whether to 1) select industries to invest in, or 2) sort out industries not desirable to invest in
+  - the user can choose optimization method and whether to allow for shorting or not
   - the user get output on which portofolio is the optimal one based upon the 
-    chosen optimization method
+    chosen optimization method, with optimal portfolio statistics and optimal ratios of eatch stock in this portfolio
   - the user is getting error messages and warnings when something that can affect
-    the validity of the output is happening.
-
+    the validity of the output is happening, or input is missing. 
 
 It is recommended to choose a time period between January 2005 and 31st of July 2020, 
 as stock values from this time period is stored locally. When using data not stored 
@@ -32,7 +36,10 @@ locally, errors might happen if the script fails to collect the data. The set of
 stocks is collected form Yahoo Finance. The lists of sin stocks and green stocks are 
 collected manually from different sources, before they are loaded into R as data 
 frames. These data frames can be used for including or decluding certain shares in 
-the shiny app.
+the shiny app. 
+
+The app is tested on following R.versions: 4.0.2, 
+To check your R.version write R.Version() in R console.
 
 To run the scripts you will need an internet connection. In addition, make 
 sure to install all the packages needed. Packages used are:
@@ -55,16 +62,15 @@ sure to install all the packages needed. Packages used are:
 
 The Shiny app has three different tabs. One for selecting stocks, one for 
 selecting the optimalization, and one to see the results represented in 
-graphs and charts. It is important to open Shiny app in full screen for the
-best visual solution. 
+graphs and charts. For best experience open Shiny app in full screen.
 
 We have chosen to have one Shiny file and several sub files for 
 functions and the R-data. If all the files are downloaded, the 
-Shiny file will collect the information you need from the sub files.
+Shiny file will import the information you need from the sub files.
 
 Explanation of the different files:
 #Ban400-functions.R: 
-- Include all functions needed to calculate or plot results. This file also loads
+- Include all functions needed to calculate. This file also loads
   all the data from the three Rdata-files to get results.
 
 #df1.Rdata:
