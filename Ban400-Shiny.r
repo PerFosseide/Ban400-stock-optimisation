@@ -788,18 +788,29 @@ server <- function(input, output, session) {
   })
   
   
+  
   # Generate output for the efficiency frontier
-  output$vefficency_frontier <- renderPlot({
-    nstocks <- length(input$manual)
+  output$vefficency_frontier <- renderPlot ({
     validate(
       need(isTruthy(input$rfrate), "Please input risk free rate at the stock selection page"),
       need(isTruthy(input$manual), "Please input stocks at the stock selection page"),
-      need(nstocks >= 2, "Please select more stocks"),
-      need(isTruthy(input$fromdate), "Please input a valid date at the stock selection page"),
+      need(isTruthy(input$fromdate), "Please input a valid date at the stock selection page"),  
       need(isTruthy(input$todate), "Please input a valid date at the stock selection page")
     )
-    efficency_frontier(dataInput()[[1]], dataInput()[[7]], dataInput()[[3]], dataInput()[[6]], n = 5000)
+    
+    x <- input$method
+    if (x == "Sharpe Ratio Maximizing"){
+      efficency_frontier(sharpe_output()[[3]], dataInput()[[7]], dataInput()[[3]], dataInput()[[6]], n = 5000)  
+    }
+    else if (x == "Sortino Ratio Maximizing"){
+      efficency_frontier(sortino_output()[[3]], dataInput()[[7]], dataInput()[[3]], dataInput()[[6]], n = 5000)  
+    }
+    else{
+      efficency_frontier(vol_output()[[3]], dataInput()[[7]], dataInput()[[3]], dataInput()[[6]], n = 5000)  
+    }
+    
   })
+  
   
 
   # Generate output for the S&P500 comparison
