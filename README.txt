@@ -35,8 +35,11 @@ as stock values from this time period is stored locally. When using data not sto
 locally, errors might happen if the script fails to collect the data. The set of 
 stocks is collected form Yahoo Finance. The lists of sin stocks and green stocks are 
 collected manually from different sources, before they are loaded into R as data 
-frames. These data frames can be used for including or decluding certain shares in 
+frames. These data frames can be used for including or excluding certain shares in 
 the shiny app. 
+
+It is also recommended to use fullscreen when selecting a large amount of stocks to improve the readabilty of the plots.
+This is not required and the app should scale to the size f the window it occupies.
 
 The app is tested on following R.versions: 4.0.2, 
 To check your R.version write R.Version() in R console.
