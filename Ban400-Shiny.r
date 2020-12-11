@@ -1,3 +1,4 @@
+
 library(shiny)
 library(tidyquant)
 library(tidyverse)
@@ -13,8 +14,6 @@ library(shinythemes)
 library(shinycssloaders)
 library(RColorBrewer)
 library(stringr)
-
-
 
 # Avoiding the navbar to be placed over the headerpanel
 css <- HTML(" body{
@@ -40,7 +39,7 @@ to_date <- "2020-08-31"
 
 # Setting a dynamic default max date
 max_to_date <- Sys.Date()
-max_from_date <- as.Date(max_to_date) - 7 # Ensuring that max from date never is less than 7 days before the to date
+max_from_date <- as.Date(max_to_date) - 7 # Ensuring that max from date is not closer than 7 days
 
 
 # Setting a default max value for stock selection
@@ -85,7 +84,7 @@ ui <- fluidPage(
                           
                         ),
                         
-                        actionButton("random", "Get portfolio"), # Goal: Refresh a random selection of stocks within the selected categories
+                        actionButton("random", "Get portfolio"), # Get a portfolio aligned with your previous choices
                         selectInput("manual", "Select stocks", stocks_with_industry$Symbol, multiple = TRUE, selectize = TRUE),
                         
                         numericInput("rfrate", "Risk free rate: ", 0.02,
@@ -97,7 +96,7 @@ ui <- fluidPage(
                         dateInput("fromdate", "Test-data from: ", 
                                   from_date,
                                   min = "2000-01-01",
-                                  max = max_from_date, # We need minimum 1 week of data to give sensible answers
+                                  max = max_from_date, 
                                   format = "yyyy/mm/dd"
                         ),
                         dateInput("todate", "Test-data to: ",
@@ -109,9 +108,7 @@ ui <- fluidPage(
                         actionButton("update", "Confirm Selection")),
                       
                       mainPanel(
-                        # -- Showing the outputs -- #
-                        
-                        # Optimal portofolio
+                        # All available stocks
                         h3("Available Stocks"),
                         shinycssloaders::withSpinner(dataTableOutput("vstock_list")))),
              
@@ -180,13 +177,10 @@ ui <- fluidPage(
                                    
                                    shinycssloaders::withSpinner(tableOutput("stats")), 
                                    
+                                   # Optimal portfolio stock volumes
                                    h3("Optimal Volume"),
                                    shinycssloaders::withSpinner(dataTableOutput("volstats")),
                                    
-                                   
-                                   # Portfolio stats
-                                   # h3("Sharpe max stats"),
-                                   # shinycssloaders::withSpinner(tableOutput("vsharpe_stat")),
                                    
                           ),
                           tabPanel("Charts",
@@ -195,7 +189,7 @@ ui <- fluidPage(
                                    h4("Portfolio"),
                                    shinycssloaders::withSpinner(plotOutput("vpiechart")),
                                    
-                                   #portfolio returns historgram
+                                   # Portfolio returns histogram
                                    h4("Portfolio returns histogram"),
                                    shinycssloaders::withSpinner(plotOutput("vport_hist")),
                                    
@@ -235,16 +229,11 @@ server <- function(input, output, session) {
   
   
   
-  ############################### PROCESSING INPUTS ###############################################
+  ############################### INPUT PROCESSING ###############################################
   
   # Update stock_input with input from dateInput "fromdate" og "todate"
   # eventReactive means that it updates the function inputs every time user clicks the "update" button
-  
-  #  observe({  # Update the choice list - currently only work when the user select one industry. It does not filter out if the user select more than one industry (needs to be fixed)
-  #    updateSelectInput(session, "manual", 
-  #                      choices = stocks_with_industry$Symbol[stocks_with_industry$Industry != input$industry]) # The user will not be able to chose a stock within the unwanted industry
-  #                      
-  #  })
+
   
   `%notin%` <- Negate(`%in%`) # Making an opposite of %in%
   
@@ -260,7 +249,7 @@ server <- function(input, output, session) {
       showNotification(id = "above50", "You have selected more than 50 stocks, expect 1 minute of loading time", type = "warning")
     }
     else if(input$n_unique_stocks > max_stockselection){
-      showNotification(id = "above100", "Please select less than 100 stocks", type = "error")
+      showNotification(id = "above100", "Please select less than 1000 stocks", type = "error")
     }
     
     else{
@@ -686,8 +675,6 @@ server <- function(input, output, session) {
   })
   
   
-  
-  
   # Generate output for the returns histogram
   output$vreturns_hist <- renderPlot({
     nstocks <- length(input$manual)
@@ -750,7 +737,6 @@ server <- function(input, output, session) {
   })
   
 
-  
   # Generate output for the S&P500 comparison
   output$vcompare_SP500 <- renderPlot({
     nstocks <- length(input$manual)
