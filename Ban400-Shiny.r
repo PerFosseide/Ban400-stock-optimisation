@@ -22,7 +22,6 @@ library(RColorBrewer)
 library(stringr)
 
 # -- Load stock optimizing functions
-
 source("Ban400-Shiny-Functions.R")
 
 # -- End of loading -- #
@@ -304,7 +303,7 @@ server <- function(input, output, session) {
       showNotification(id = "noinput1", "Please select a number of stocks", type = "error") # Show a notification with theme "error"
     }
     
-    else if (input$n_unique_stocks > 500 & input$n_unique_stocks <= max_stockselection){ # Else if n_unique_stocks is above 50 and under max allowed number:
+    else if (input$n_unique_stocks > 100 & input$n_unique_stocks <= max_stockselection){ # Else if n_unique_stocks is above 50 and under max allowed number:
       showNotification(id = "above50", "You have selected a lot of stocks, expect longer loading time", type = "warning") # Show notification
     }
     else if(input$n_unique_stocks > max_stockselection){ # If number of number of stocks selected is above allowed number of stocks
@@ -348,7 +347,7 @@ server <- function(input, output, session) {
   })
   
   observe({
-    if (length(input$manual) > 100){ # If amount of input stocks is above 100 
+    if (length(input$manual) > 150){ # If amount of input stocks is above 150 
       showNotification("Loading may now take up to 1 minute", type = "warning")
     }
     else{
@@ -854,5 +853,5 @@ server <- function(input, output, session) {
 
 shinyApp(ui = ui, server = server) # Combine it into the app
 
-# Depending on the amount of stocks there can be some loading time (from 10 sec to 3 minutes)
+# Depending on the amount of stocks there can be some loading time (from 5 sec to 3 minutes)
 
